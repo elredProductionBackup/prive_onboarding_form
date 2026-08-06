@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privé - Membership Application</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'Mencken Std';
+            src: url('mencken-std.otf') format('opentype');
+            font-weight: 400;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">Membership Application</h2>
+                <p class="sidebar-subtitle">Help us understand your journey, business, expertise, and aspirations.</p>
+            </div>
+
+            <div class="progress-section">
+                <div class="progress-header">
+                    <span id="stepText">Step 1 of 3</span>
+                    <span id="percentText">33% Complete</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 33%;"></div>
+                </div>
+            </div>
+
+            <div class="steps">
+                <div class="step active" data-step="1" onclick="goToStep(1)">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Personal Information</h3>
+                        <p>Basic details about you</p>
+                    </div>
+                </div>
+
+                <div class="step" data-step="2" onclick="goToStep(2)">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Company Information</h3>
+                        <p>Your business details</p>
+                    </div>
+                </div>
+
+                <div class="step" data-step="3" onclick="goToStep(3)">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Partnerships & Collaboration</h3>
+                        <p>Additional information</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <button class="mobile-menu-btn" onclick="toggleSidebar()" style="display: none; position: fixed; top: 20px; left: 20px; z-index: 999; background: none; border: none; cursor: pointer; font-size: 24px;">
+                <i class="material-icons">menu</i>
+            </button>
+            <div class="header">
+                <img src="logo.svg" alt="Privé" class="logo">
+            </div>
+
+            <!-- STEP 1: PERSONAL INFORMATION -->
+            <div class="form-section active" id="step1">
+                <div class="form-section-header">
+                    <div class="section-icon">
+                        <i class="material-icons">person</i>
+                    </div>
+                    <div>
+                        <h2 class="section-title">Personal Information</h2>
+                        <p class="section-subtitle">Please provide your personal details.</p>
+                    </div>
+                </div>
+
+                <h3 class="form-title">Personal Information</h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" id="firstName" placeholder="e.g. John Michael Smith">
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName" placeholder="e.g. John Michael Smith">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dob">Date of Birth</label>
+                        <input type="text" id="dob" placeholder="DD / MM / YYYY">
+                    </div>
+                    <div class="form-group">
+                        <label for="mobile">Mobile</label>
+                        <div style="display: flex; gap: 8px;">
+                            <select style="max-width: 80px;">
+                                <option selected>+91</option>
+                                <option>+1</option>
+                                <option>+44</option>
+                            </select>
+                            <input type="tel" id="mobile" placeholder="000 000 0000" style="flex: 1;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row full">
+                    <div class="form-group">
+                        <label for="email">E-mail</label>
+                        <input type="email" id="email" placeholder="email@example.com">
+                    </div>
+                </div>
+
+                <div class="form-row four-column">
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <select id="city">
+                            <option>Select city</option>
+                            <option>Mumbai</option>
+                            <option>Delhi</option>
+                            <option>Bangalore</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="state">State</label>
+                        <select id="state">
+                            <option>Select state</option>
+                            <option>Maharashtra</option>
+                            <option>Delhi</option>
+                            <option>Karnataka</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pin">PIN / ZIP Code</label>
+                        <input type="text" id="pin" placeholder="Enter PIN / ZIP Code">
+                    </div>
+                    <div class="form-group">
+                        <label for="country">Country</label>
+                        <select id="country">
+                            <option>Select state</option>
+                            <option>India</option>
+                            <option>USA</option>
+                            <option>UK</option>
+                        </select>
+                    </div>
+                </div>
+
+                <h3 class="form-title">Identity Proof</h3>
+                <p class="form-subtitle">Kindly share your identity proof such as aadhar, passport</p>
+
+                <div class="file-upload-container">
+                    <div class="file-upload">
+                        <div class="upload-icon">
+                            <i class="material-icons">cloud_upload</i>
+                        </div>
+                        <div class="upload-text">Click to upload or Drag and drop</div>
+                    </div>
+                    <div class="file-upload">
+                        <div class="upload-icon">
+                            <i class="material-icons">cloud_upload</i>
+                        </div>
+                        <div class="upload-text">Click to upload or Drag and drop</div>
+                    </div>
+                    <div class="file-upload">
+                        <div class="upload-icon">
+                            <i class="material-icons">cloud_upload</i>
+                        </div>
+                        <div class="upload-text">Click to upload or Drag and drop</div>
+                    </div>
+                </div>
+
+                <div class="form-row three-column" style="margin-top: 15px;">
+                    <div style="text-align: center;">
+                        <label style="text-align: center; margin-bottom: 0;">Passport</label>
+                    </div>
+                    <div style="text-align: center;">
+                        <label style="text-align: center; margin-bottom: 0;">Driving License</label>
+                    </div>
+                    <div style="text-align: center;">
+                        <label style="text-align: center; margin-bottom: 0;">National ID</label>
+                    </div>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="certification">
+                    <label for="certification" class="checkbox-label">
+                        I certify that the information provided in this application is true and complete to the best of my knowledge, and I understand that any misrepresentation may be grounds for rejection or termination of membership.
+                    </label>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="goToStep(1)">Save Draft</button>
+                    <button class="btn-primary" onclick="goToStep(2)">Next →</button>
+                </div>
+            </div>
+
+            <!-- STEP 2: COMPANY INFORMATION -->
+            <div class="form-section" id="step2">
+                <div class="form-section-header">
+                    <div class="section-icon">
+                        <i class="material-icons">business</i>
+                    </div>
+                    <div>
+                        <h2 class="section-title">Company Information</h2>
+                        <p class="section-subtitle">Please provide your business details.</p>
+                    </div>
+                </div>
+
+                <h3 class="form-title">Company Details</h3>
+                <p class="form-subtitle">Kindly note invoice would be issued on these details</p>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="companyName">Company Name</label>
+                        <input type="text" id="companyName" placeholder="Company Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="designation">Designation</label>
+                        <input type="text" id="designation" placeholder="Your designation">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="companyLocation">Company location</label>
+                        <select id="companyLocation">
+                            <option>City</option>
+                            <option>Mumbai</option>
+                            <option>Delhi</option>
+                            <option>Bangalore</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="websiteUrl">Company's website URL</label>
+                        <input type="text" id="websiteUrl" placeholder="Enter website URL">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Nature of Business</label>
+                    <div class="button-group-inline">
+                        <button class="btn-toggle" onclick="toggleButton(this)">Manufacturing</button>
+                        <button class="btn-toggle" onclick="toggleButton(this)">Services</button>
+                        <button class="btn-toggle" onclick="toggleButton(this)">Distribution</button>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Type of Company (please select)</label>
+                        <div class="button-group-inline">
+                            <button class="btn-toggle" onclick="toggleButton(this)">Private</button>
+                            <button class="btn-toggle" onclick="toggleButton(this)">Public</button>
+                            <button class="btn-toggle" onclick="toggleButton(this)">Division of a Larger Group</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="gstNumber">GST Number</label>
+                        <input type="text" id="gstNumber" placeholder="Enter GST Number">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="goToStep(1)">← Back</button>
+                    <button class="btn-secondary" onclick="goToStep(2)">Save Draft</button>
+                    <button class="btn-primary" onclick="goToStep(3)">Next →</button>
+                </div>
+            </div>
+
+            <!-- STEP 3: PARTNERSHIPS & COLLABORATION -->
+            <div class="form-section" id="step3">
+                <div class="form-section-header">
+                    <div class="section-icon">
+                        <i class="material-icons">handshake</i>
+                    </div>
+                    <div>
+                        <h2 class="section-title">Partnerships & Collaboration</h2>
+                        <p class="section-subtitle">Help us understand what brings you Privé and what you hope to contribute and gain.</p>
+                    </div>
+                </div>
+
+                <h3 class="form-title">Partnerships & Collaboration</h3>
+                <p class="form-subtitle">An important part of Privé is about us building an ecosystem. Global relevance is not built through isolated successes. It is earned by building complete ecosystems; research, manufacturing, and resilient supply chains.</p>
+
+                <!-- What kind of partners -->
+                <div class="form-group">
+                    <label>What kind of partners or collaboration would you seek from the members?</label>
+                    <div class="button-group-inline">
+                        <button class="btn-toggle" onclick="toggleButton(this)">Suppliers</button>
+                        <button class="btn-toggle" onclick="toggleButton(this)">Distributors</button>
+                        <button class="btn-toggle" onclick="toggleButton(this)">Retailers</button>
+                        <button class="btn-toggle" onclick="toggleButton(this)">Investors</button>
+                        <button class="btn-toggle" onclick="toggleButton(this)">Consultants</button>
+                    </div>
+                </div>
+
+                <!-- Add location -->
+                <div class="form-group">
+                    <label>Add location</label>
+                    <div class="location-row">
+                        <select>
+                            <option>City</option>
+                            <option>Mumbai</option>
+                            <option>Delhi</option>
+                            <option>Bangalore</option>
+                        </select>
+                        <select>
+                            <option>Country</option>
+                            <option>India</option>
+                            <option>USA</option>
+                            <option>UK</option>
+                        </select>
+                        <button class="btn-toggle" onclick="toggleButton(this)">Worldwide</button>
+                        <button class="btn-toggle" onclick="toggleButton(this)">Remote</button>
+                    </div>
+                </div>
+
+                <!-- Industries -->
+                <div class="form-group">
+                    <label>I am open to partnership with the following industries</label>
+                    <textarea style="width: 100%; padding: 12px 14px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; color: #333333; resize: vertical; min-height: 60px;" placeholder="Add industry"></textarea>
+                </div>
+
+                <!-- What are you looking in a partner -->
+                <div class="form-group">
+                    <label>What are you looking in a partner?</label>
+
+                    <div style="display: flex; align-items: baseline; gap: 15px; margin: 20px 0;">
+                        <span style="font-weight: 500; color: #333333; font-size: 13px;">The partner should have</span>
+                        <!-- Tabs Toggle -->
+                        <div class="tab-toggle">
+                            <button class="tab-btn active" onclick="switchTab(this, 'product')">Product</button>
+                            <button class="tab-btn" onclick="switchTab(this, 'services')">Services</button>
+                        </div>
+                    </div>
+
+                    <!-- Product Tab Content -->
+                    <div id="product-tab" class="tab-content">
+                        <div style="margin-bottom: 20px;">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="manufacturing" checked class="material-checkbox">
+                                <span class="checkbox-icon checked">
+                                    <i class="material-icons">check_box</i>
+                                </span>
+                                <label for="manufacturing" style="margin: 0; font-weight: 500;">Manufacturing</label>
+                                <input type="text" placeholder="Enter Location" style="flex: 1; padding: 8px 12px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px;">
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="warehouse" class="material-checkbox">
+                                <span class="checkbox-icon">
+                                    <i class="material-icons">check_box_outline_blank</i>
+                                </span>
+                                <label for="warehouse" style="margin: 0; font-weight: 500;">Warehouse</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="retail" class="material-checkbox">
+                                <span class="checkbox-icon">
+                                    <i class="material-icons">check_box_outline_blank</i>
+                                </span>
+                                <label for="retail" style="margin: 0; font-weight: 500;">Retail</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="distribution" class="material-checkbox">
+                                <span class="checkbox-icon">
+                                    <i class="material-icons">check_box_outline_blank</i>
+                                </span>
+                                <label for="distribution" style="margin: 0; font-weight: 500;">Distribution</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="team" checked class="material-checkbox">
+                                <span class="checkbox-icon checked">
+                                    <i class="material-icons">check_box</i>
+                                </span>
+                                <label for="team" style="margin: 0; font-weight: 500;">Team</label>
+                                <label for="employees" style="margin: 0; font-weight: 500; margin-left: 60px;">Share the number of full time employee</label>
+                                <input type="number" id="employees" placeholder="e.g. 25" style="width: 100px; padding: 8px 12px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Services Tab Content -->
+                    <div id="services-tab" class="tab-content" style="display: none;">
+                        <div style="margin-bottom: 20px;">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="offices" class="material-checkbox">
+                                <span class="checkbox-icon">
+                                    <i class="material-icons">check_box_outline_blank</i>
+                                </span>
+                                <label for="offices" style="margin: 0; font-weight: 500;">Offices</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="team-services" checked class="material-checkbox">
+                                <span class="checkbox-icon checked">
+                                    <i class="material-icons">check_box</i>
+                                </span>
+                                <label for="team-services" style="margin: 0; font-weight: 500;">Team</label>
+                                <label for="employees-services" style="margin: 0; font-weight: 500; margin-left: 12px;">Share the number of full time employee</label>
+                                <input type="number" id="employees-services" placeholder="e.g. 25" style="width: 100px; padding: 8px 12px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Problem Statement -->
+                <div class="form-group">
+                    <label>Is there a problem you would like members of Privé to help you solve ? (Kindly do note that this would get shared within the Privé network for peers to help you)</label>
+                    <textarea style="width: 100%; padding: 12px 14px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; color: #333333; resize: vertical; min-height: 100px;" placeholder="Share your problem"></textarea>
+                </div>
+
+                <!-- Signature and Date -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="signature">Signature (type full name to confirm)</label>
+                        <input type="text" id="signature" placeholder="Full name">
+                    </div>
+                    <div class="form-group">
+                        <label for="signDate">Date</label>
+                        <input type="text" id="signDate" placeholder="DD / MM / YYYY">
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 50px;">
+                    <button class="btn-primary" onclick="submitForm()" style="width: auto; padding: 14px 48px; font-size: 16px;">Submit Application</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goToStep(step) {
+            // Hide all sections
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Show selected section
+            document.getElementById('step' + step).classList.add('active');
+
+            // Update sidebar
+            document.querySelectorAll('.step').forEach(stepElement => {
+                stepElement.classList.remove('active', 'inactive');
+                if (parseInt(stepElement.dataset.step) === step) {
+                    stepElement.classList.add('active');
+                } else if (parseInt(stepElement.dataset.step) < step) {
+                    // Completed steps
+                } else {
+                    stepElement.classList.add('inactive');
+                }
+            });
+
+            // Update progress
+            const progressPercentages = [33, 67, 100];
+            const progressTexts = [
+                'Step 1 of 3',
+                'Step 2 of 3',
+                'Step 3 of 3'
+            ];
+            const percentTexts = [
+                '33% Complete',
+                '67% Complete',
+                '100% Complete'
+            ];
+
+            document.getElementById('progressFill').style.width = progressPercentages[step - 1] + '%';
+            document.getElementById('stepText').textContent = progressTexts[step - 1];
+            document.getElementById('percentText').textContent = percentTexts[step - 1];
+
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        function toggleButton(button) {
+            button.classList.toggle('active');
+        }
+
+        function switchTab(button, tabId) {
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+
+            // Add active class to clicked button
+            button.classList.add('active');
+
+            // Show selected tab content
+            document.getElementById(tabId + '-tab').style.display = 'block';
+        }
+
+        function submitForm() {
+            alert('Form submitted successfully!');
+        }
+
+        // Mobile Menu Toggle
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('active');
+        }
+
+        // Show/hide mobile menu button on resize
+        function checkMobileMenu() {
+            const menuBtn = document.querySelector('.mobile-menu-btn');
+            if (window.innerWidth <= 768) {
+                menuBtn.style.display = 'block';
+            } else {
+                menuBtn.style.display = 'none';
+            }
+        }
+
+        checkMobileMenu();
+        window.addEventListener('resize', checkMobileMenu);
+
+        // Close sidebar when clicking a step on mobile
+        if (window.innerWidth <= 768) {
+            document.querySelectorAll('.step').forEach(step => {
+                step.addEventListener('click', function() {
+                    document.querySelector('.sidebar').classList.remove('active');
+                });
+            });
+        }
+
+        // Material Icons Checkbox Toggle
+        document.querySelectorAll('.material-checkbox').forEach(checkbox => {
+            const icon = checkbox.nextElementSibling;
+
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    icon.classList.add('checked');
+                    icon.innerHTML = '<i class="material-icons">check_box</i>';
+                } else {
+                    icon.classList.remove('checked');
+                    icon.innerHTML = '<i class="material-icons">check_box_outline_blank</i>';
+                }
+            });
+
+            icon.addEventListener('click', function() {
+                checkbox.checked = !checkbox.checked;
+                checkbox.dispatchEvent(new Event('change'));
+            });
+        });
+    </script>
+</body>
+</html>
