@@ -35,7 +35,7 @@
             </div>
 
             <div class="steps">
-                <div class="step active" data-step="1" onclick="goToStep(1)">
+                <div class="step active" data-step="1" onclick="handleStepClick(1)">
                     <div class="step-number">1</div>
                     <div class="step-content">
                         <h3>Personal Information</h3>
@@ -43,7 +43,7 @@
                     </div>
                 </div>
 
-                <div class="step" data-step="2" onclick="goToStep(2)">
+                <div class="step" data-step="2" onclick="handleStepClick(2)">
                     <div class="step-number">2</div>
                     <div class="step-content">
                         <h3>Company Information</h3>
@@ -51,7 +51,7 @@
                     </div>
                 </div>
 
-                <div class="step" data-step="3" onclick="goToStep(3)">
+                <div class="step" data-step="3" onclick="handleStepClick(3)">
                     <div class="step-number">3</div>
                     <div class="step-content">
                         <h3>Partnerships & Collaboration</h3>
@@ -87,28 +87,28 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="firstName">First Name</label>
-                        <input type="text" id="firstName" placeholder="e.g. John Michael Smith">
+                        <input type="text" id="firstName" placeholder="e.g. John" required minlength="2" title="First name must be at least 2 characters">
                     </div>
                     <div class="form-group">
                         <label for="lastName">Last Name</label>
-                        <input type="text" id="lastName" placeholder="e.g. John Michael Smith">
+                        <input type="text" id="lastName" placeholder="e.g. Smith" required minlength="2" title="Last name must be at least 2 characters">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="dob">Date of Birth</label>
-                        <input type="text" id="dob" placeholder="DD / MM / YYYY">
+                        <input type="text" id="dob" placeholder="DD/MM/YYYY" required inputmode="numeric" pattern="^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/\d{4}$" title="Please enter date in DD/MM/YYYY format">
                     </div>
                     <div class="form-group">
                         <label for="mobile">Mobile</label>
                         <div style="display: flex; gap: 8px;">
-                            <select style="max-width: 80px;">
+                            <select id="mobileCode" style="max-width: 80px;" required>
                                 <option selected>+91</option>
                                 <option>+1</option>
                                 <option>+44</option>
                             </select>
-                            <input type="tel" id="mobile" placeholder="000 000 0000" style="flex: 1;">
+                            <input type="tel" id="mobile" placeholder="10 digit mobile number" style="flex: 1;" required inputmode="numeric" pattern="^\d{10}$" title="Please enter a valid 10 digit mobile number">
                         </div>
                     </div>
                 </div>
@@ -116,82 +116,76 @@
                 <div class="form-row full">
                     <div class="form-group">
                         <label for="email">E-mail</label>
-                        <input type="email" id="email" placeholder="email@example.com">
+                        <input type="email" id="email" placeholder="email@example.com" required title="Please enter a valid email address">
                     </div>
                 </div>
 
                 <div class="form-row four-column">
                     <div class="form-group">
                         <label for="city">City</label>
-                        <select id="city">
-                            <option>Select city</option>
-                            <option>Mumbai</option>
-                            <option>Delhi</option>
-                            <option>Bangalore</option>
-                        </select>
+                        <input type="text" id="city" placeholder="Enter your city" required minlength="2" pattern="^[^0-9]+$" title="City cannot contain numbers">
                     </div>
                     <div class="form-group">
                         <label for="state">State</label>
-                        <select id="state">
-                            <option>Select state</option>
-                            <option>Maharashtra</option>
-                            <option>Delhi</option>
-                            <option>Karnataka</option>
-                        </select>
+                        <input type="text" id="state" placeholder="Enter your state" required minlength="2" pattern="^[^0-9]+$" title="State cannot contain numbers">
                     </div>
                     <div class="form-group">
                         <label for="pin">PIN / ZIP Code</label>
-                        <input type="text" id="pin" placeholder="Enter PIN / ZIP Code">
+                        <input type="text" id="pin" placeholder="Enter PIN / ZIP Code" required inputmode="numeric" pattern="^\d{4,10}$" title="Please enter a valid numeric PIN / ZIP code">
                     </div>
                     <div class="form-group">
                         <label for="country">Country</label>
-                        <select id="country">
-                            <option>Select state</option>
-                            <option>India</option>
-                            <option>USA</option>
-                            <option>UK</option>
-                        </select>
+                        <input type="text" id="country" placeholder="Enter your country" required minlength="2" pattern="^[^0-9]+$" title="Country cannot contain numbers">
                     </div>
                 </div>
 
                 <h3 class="form-title">Identity Proof</h3>
                 <p class="form-subtitle">Kindly share your identity proof such as aadhar, passport</p>
 
-                <div class="file-upload-container">
-                    <div class="file-upload">
-                        <div class="upload-icon">
-                            <i class="material-icons">cloud_upload</i>
+                <div class="form-group required-group" data-group-name="Identity Proof" data-check="files">
+                    <div class="file-upload-container">
+                        <div class="file-upload" onclick="triggerFileUpload(this)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleFileDrop(event, this)">
+                            <input type="file" id="idProofPassport" class="file-upload-input" accept="image/*,.pdf" style="display:none" onchange="handleFileSelect(this)">
+                            <div class="upload-icon">
+                                <i class="material-icons">cloud_upload</i>
+                            </div>
+                            <div class="upload-text">Click to upload or Drag and drop</div>
+                            <div class="upload-filename"></div>
                         </div>
-                        <div class="upload-text">Click to upload or Drag and drop</div>
-                    </div>
-                    <div class="file-upload">
-                        <div class="upload-icon">
-                            <i class="material-icons">cloud_upload</i>
+                        <div class="file-upload" onclick="triggerFileUpload(this)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleFileDrop(event, this)">
+                            <input type="file" id="idProofDrivingLicense" class="file-upload-input" accept="image/*,.pdf" style="display:none" onchange="handleFileSelect(this)">
+                            <div class="upload-icon">
+                                <i class="material-icons">cloud_upload</i>
+                            </div>
+                            <div class="upload-text">Click to upload or Drag and drop</div>
+                            <div class="upload-filename"></div>
                         </div>
-                        <div class="upload-text">Click to upload or Drag and drop</div>
-                    </div>
-                    <div class="file-upload">
-                        <div class="upload-icon">
-                            <i class="material-icons">cloud_upload</i>
+                        <div class="file-upload" onclick="triggerFileUpload(this)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleFileDrop(event, this)">
+                            <input type="file" id="idProofNationalId" class="file-upload-input" accept="image/*,.pdf" style="display:none" onchange="handleFileSelect(this)">
+                            <div class="upload-icon">
+                                <i class="material-icons">cloud_upload</i>
+                            </div>
+                            <div class="upload-text">Click to upload or Drag and drop</div>
+                            <div class="upload-filename"></div>
                         </div>
-                        <div class="upload-text">Click to upload or Drag and drop</div>
                     </div>
-                </div>
 
-                <div class="form-row three-column" style="margin-top: 15px;">
-                    <div style="text-align: center;">
-                        <label style="text-align: center; margin-bottom: 0;">Passport</label>
+                    <div class="form-row three-column" style="margin-top: 15px;">
+                        <div style="text-align: center;">
+                            <label style="text-align: center; margin-bottom: 0;">Passport</label>
+                        </div>
+                        <div style="text-align: center;">
+                            <label style="text-align: center; margin-bottom: 0;">Driving License</label>
+                        </div>
+                        <div style="text-align: center;">
+                            <label style="text-align: center; margin-bottom: 0;">National ID</label>
+                        </div>
                     </div>
-                    <div style="text-align: center;">
-                        <label style="text-align: center; margin-bottom: 0;">Driving License</label>
-                    </div>
-                    <div style="text-align: center;">
-                        <label style="text-align: center; margin-bottom: 0;">National ID</label>
-                    </div>
+                    <p class="form-subtitle" style="margin-top: 10px; margin-bottom: 0;">Please upload at least one of the above documents.</p>
                 </div>
 
                 <div class="checkbox-group">
-                    <input type="checkbox" id="certification">
+                    <input type="checkbox" id="certification" required>
                     <label for="certification" class="checkbox-label">
                         I certify that the information provided in this application is true and complete to the best of my knowledge, and I understand that any misrepresentation may be grounds for rejection or termination of membership.
                     </label>
@@ -199,7 +193,7 @@
 
                 <div class="button-group">
                     <button class="btn-secondary" onclick="goToStep(1)">Save Draft</button>
-                    <button class="btn-primary" onclick="goToStep(2)">Next →</button>
+                    <button class="btn-primary" onclick="handleNext(1, 2)">Next →</button>
                 </div>
             </div>
 
@@ -221,31 +215,26 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="companyName">Company Name</label>
-                        <input type="text" id="companyName" placeholder="Company Name">
+                        <input type="text" id="companyName" placeholder="Company Name" required>
                     </div>
                     <div class="form-group">
                         <label for="designation">Designation</label>
-                        <input type="text" id="designation" placeholder="Your designation">
+                        <input type="text" id="designation" placeholder="Your designation" required>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="companyLocation">Company location</label>
-                        <select id="companyLocation">
-                            <option>City</option>
-                            <option>Mumbai</option>
-                            <option>Delhi</option>
-                            <option>Bangalore</option>
-                        </select>
+                        <input type="text" id="companyLocation" placeholder="Enter company city" required minlength="2" pattern="^[^0-9]+$" title="City cannot contain numbers">
                     </div>
                     <div class="form-group">
                         <label for="websiteUrl">Company's website URL</label>
-                        <input type="text" id="websiteUrl" placeholder="Enter website URL">
+                        <input type="text" id="websiteUrl" placeholder="Enter website URL" required pattern="^(https?:\/\/)?([0-9a-zA-Z\-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$" title="Please enter a valid website URL, e.g. https://example.com">
                     </div>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group required-group" data-group-name="Nature of Business">
                     <label>Nature of Business</label>
                     <div class="button-group-inline">
                         <button class="btn-toggle" onclick="toggleButton(this)">Manufacturing</button>
@@ -255,7 +244,7 @@
                 </div>
 
                 <div class="form-row">
-                    <div class="form-group">
+                    <div class="form-group required-group" data-group-name="Type of Company">
                         <label>Type of Company (please select)</label>
                         <div class="button-group-inline">
                             <button class="btn-toggle" onclick="toggleButton(this)">Private</button>
@@ -265,14 +254,14 @@
                     </div>
                     <div class="form-group">
                         <label for="gstNumber">GST Number</label>
-                        <input type="text" id="gstNumber" placeholder="Enter GST Number">
+                        <input type="text" id="gstNumber" placeholder="Enter GST Number" required>
                     </div>
                 </div>
 
                 <div class="button-group">
                     <button class="btn-secondary" onclick="goToStep(1)">← Back</button>
                     <button class="btn-secondary" onclick="goToStep(2)">Save Draft</button>
-                    <button class="btn-primary" onclick="goToStep(3)">Next →</button>
+                    <button class="btn-primary" onclick="handleNext(2, 3)">Next →</button>
                 </div>
             </div>
 
@@ -292,7 +281,7 @@
                 <p class="form-subtitle">An important part of Privé is about us building an ecosystem. Global relevance is not built through isolated successes. It is earned by building complete ecosystems; research, manufacturing, and resilient supply chains.</p>
 
                 <!-- What kind of partners -->
-                <div class="form-group">
+                <div class="form-group required-group" data-group-name="Kind of partners or collaboration">
                     <label>What kind of partners or collaboration would you seek from the members?</label>
                     <div class="button-group-inline">
                         <button class="btn-toggle" onclick="toggleButton(this)">Suppliers</button>
@@ -307,18 +296,8 @@
                 <div class="form-group">
                     <label>Add location</label>
                     <div class="location-row">
-                        <select>
-                            <option>City</option>
-                            <option>Mumbai</option>
-                            <option>Delhi</option>
-                            <option>Bangalore</option>
-                        </select>
-                        <select>
-                            <option>Country</option>
-                            <option>India</option>
-                            <option>USA</option>
-                            <option>UK</option>
-                        </select>
+                        <input type="text" id="partnerCity" placeholder="City" required minlength="2" pattern="^[^0-9]+$" title="City cannot contain numbers">
+                        <input type="text" id="partnerCountry" placeholder="Country" required minlength="2" pattern="^[^0-9]+$" title="Country cannot contain numbers">
                         <button class="btn-toggle" onclick="toggleButton(this)">Worldwide</button>
                         <button class="btn-toggle" onclick="toggleButton(this)">Remote</button>
                     </div>
@@ -327,7 +306,7 @@
                 <!-- Industries -->
                 <div class="form-group">
                     <label>I am open to partnership with the following industries</label>
-                    <textarea style="width: 100%; padding: 12px 14px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; color: #333333; resize: vertical; min-height: 60px;" placeholder="Add industry"></textarea>
+                    <textarea id="industries" required style="width: 100%; padding: 12px 14px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; color: #333333; resize: vertical; min-height: 60px;" placeholder="Add industry"></textarea>
                 </div>
 
                 <!-- What are you looking in a partner -->
@@ -352,7 +331,7 @@
                                     <i class="material-icons">check_box</i>
                                 </span>
                                 <label for="manufacturing" style="margin: 0; font-weight: 500;">Manufacturing</label>
-                                <input type="text" placeholder="Enter Location" style="flex: 1; padding: 8px 12px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px;">
+                                <input type="text" id="manufacturingLocation" placeholder="Enter Location" pattern="^[^0-9]+$" title="Location cannot contain numbers" style="flex: 1; padding: 8px 12px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px;">
                             </div>
                             <div class="checkbox-item">
                                 <input type="checkbox" id="warehouse" class="material-checkbox">
@@ -413,23 +392,23 @@
                 <!-- Problem Statement -->
                 <div class="form-group">
                     <label>Is there a problem you would like members of Privé to help you solve ? (Kindly do note that this would get shared within the Privé network for peers to help you)</label>
-                    <textarea style="width: 100%; padding: 12px 14px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; color: #333333; resize: vertical; min-height: 100px;" placeholder="Share your problem"></textarea>
+                    <textarea id="problemStatement" required style="width: 100%; padding: 12px 14px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; color: #333333; resize: vertical; min-height: 100px;" placeholder="Share your problem"></textarea>
                 </div>
 
                 <!-- Signature and Date -->
                 <div class="form-row">
                     <div class="form-group">
                         <label for="signature">Signature (type full name to confirm)</label>
-                        <input type="text" id="signature" placeholder="Full name">
+                        <input type="text" id="signature" placeholder="Full name" required minlength="2">
                     </div>
                     <div class="form-group">
                         <label for="signDate">Date</label>
-                        <input type="text" id="signDate" placeholder="DD / MM / YYYY">
+                        <input type="text" id="signDate" placeholder="DD/MM/YYYY" required inputmode="numeric" pattern="^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/\d{4}$" title="Please enter date in DD/MM/YYYY format">
                     </div>
                 </div>
 
                 <div style="text-align: center; margin-top: 50px;">
-                    <button class="btn-primary" onclick="submitForm()" style="width: auto; padding: 14px 48px; font-size: 16px;">Submit Application</button>
+                    <button class="btn-primary" onclick="handleSubmit()" style="width: auto; padding: 14px 48px; font-size: 16px;">Submit Application</button>
                 </div>
             </div>
         </div>
@@ -551,6 +530,215 @@
                 checkbox.dispatchEvent(new Event('change'));
             });
         });
+
+        // ---------- Input restrictions ----------
+        function restrictToDigits(el, maxLen) {
+            if (!el) return;
+            el.addEventListener('input', () => {
+                el.value = el.value.replace(/\D/g, '').slice(0, maxLen);
+            });
+        }
+        restrictToDigits(document.getElementById('mobile'), 10);
+        restrictToDigits(document.getElementById('pin'), 10);
+
+        function attachDateMask(el) {
+            if (!el) return;
+            el.addEventListener('input', () => {
+                const digits = el.value.replace(/\D/g, '').slice(0, 8);
+                let formatted = digits;
+                if (digits.length > 4) {
+                    formatted = digits.slice(0, 2) + '/' + digits.slice(2, 4) + '/' + digits.slice(4);
+                } else if (digits.length > 2) {
+                    formatted = digits.slice(0, 2) + '/' + digits.slice(2);
+                }
+                el.value = formatted;
+            });
+        }
+        attachDateMask(document.getElementById('dob'));
+        attachDateMask(document.getElementById('signDate'));
+
+        // ---------- Strip digits from place-name fields (city/state/country) ----------
+        function restrictNoDigits(el) {
+            if (!el) return;
+            el.addEventListener('input', () => {
+                el.value = el.value.replace(/[0-9]/g, '');
+            });
+        }
+        ['city', 'state', 'country', 'companyLocation', 'partnerCity', 'partnerCountry', 'manufacturingLocation'].forEach(id => {
+            restrictNoDigits(document.getElementById(id));
+        });
+
+        // ---------- Identity Proof file uploads ----------
+        function triggerFileUpload(dropzone) {
+            dropzone.querySelector('input[type="file"]').click();
+        }
+
+        function updateDropzoneUI(input) {
+            const dropzone = input.closest('.file-upload');
+            const textEl = dropzone.querySelector('.upload-text');
+            const filenameEl = dropzone.querySelector('.upload-filename');
+            if (input.files && input.files.length > 0) {
+                dropzone.classList.add('has-file');
+                textEl.textContent = 'File uploaded';
+                filenameEl.textContent = input.files[0].name;
+            } else {
+                dropzone.classList.remove('has-file');
+                textEl.textContent = 'Click to upload or Drag and drop';
+                filenameEl.textContent = '';
+            }
+            const group = dropzone.closest('.required-group');
+            if (group) clearGroupError(group);
+        }
+
+        function handleFileSelect(input) {
+            updateDropzoneUI(input);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleFileDrop(e, dropzone) {
+            e.preventDefault();
+            dropzone.classList.remove('drag-over');
+            const input = dropzone.querySelector('input[type="file"]');
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                input.files = e.dataTransfer.files;
+                updateDropzoneUI(input);
+            }
+        }
+
+        // ---------- DOB range check: day <= 31, month <= 12, year <= 2024 ----------
+        function attachDateRangeCheck(el, maxYear) {
+            if (!el) return;
+            el.addEventListener('input', () => {
+                const match = el.value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+                if (!match) {
+                    el.setCustomValidity('');
+                    return;
+                }
+                const day = parseInt(match[1], 10);
+                const month = parseInt(match[2], 10);
+                const year = parseInt(match[3], 10);
+                if (day < 1 || day > 31) {
+                    el.setCustomValidity('Day must be between 01 and 31.');
+                } else if (month < 1 || month > 12) {
+                    el.setCustomValidity('Month must be between 01 and 12.');
+                } else if (year > maxYear) {
+                    el.setCustomValidity('Year cannot be later than ' + maxYear + '.');
+                } else {
+                    el.setCustomValidity('');
+                }
+            });
+        }
+        attachDateRangeCheck(document.getElementById('dob'), 2024);
+
+        // ---------- Validation ----------
+        function clearGroupError(group) {
+            group.classList.remove('group-error');
+            const err = group.querySelector('.error-text');
+            if (err) err.remove();
+        }
+
+        function showGroupError(group, message) {
+            group.classList.add('group-error');
+            let err = group.querySelector('.error-text');
+            if (!err) {
+                err = document.createElement('p');
+                err.className = 'error-text';
+                group.appendChild(err);
+            }
+            err.textContent = message;
+        }
+
+        function validateStep(stepNumber) {
+            const section = document.getElementById('step' + stepNumber);
+            section.classList.add('was-validated');
+            let firstInvalid = null;
+
+            // Native validity checks (required, minlength, pattern, type=email, etc.)
+            const fields = section.querySelectorAll('input, select, textarea');
+            for (const field of fields) {
+                if (!field.checkValidity()) {
+                    if (!firstInvalid) firstInvalid = field;
+                }
+            }
+
+            // Custom required groups: toggle-button groups need >=1 active, file groups need >=1 uploaded
+            let firstInvalidGroup = null;
+            section.querySelectorAll('.required-group').forEach(group => {
+                const checkType = group.dataset.check || 'toggle';
+                let satisfied;
+                if (checkType === 'files') {
+                    satisfied = Array.from(group.querySelectorAll('input[type="file"]'))
+                        .some(input => input.files && input.files.length > 0);
+                } else {
+                    satisfied = !!group.querySelector('.btn-toggle.active');
+                }
+
+                if (!satisfied) {
+                    const message = checkType === 'files'
+                        ? 'Please upload at least one document for "' + group.dataset.groupName + '".'
+                        : 'Please select at least one option for "' + group.dataset.groupName + '".';
+                    showGroupError(group, message);
+                    if (!firstInvalid && !firstInvalidGroup) firstInvalidGroup = group;
+                } else {
+                    clearGroupError(group);
+                }
+            });
+
+            if (firstInvalid) {
+                firstInvalid.reportValidity();
+                firstInvalid.focus();
+                return false;
+            }
+            if (firstInvalidGroup) {
+                firstInvalidGroup.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return false;
+            }
+            return true;
+        }
+
+        function handleNext(currentStep, nextStep) {
+            if (validateStep(currentStep)) {
+                goToStep(nextStep);
+            }
+        }
+
+        function getCurrentStep() {
+            const activeSection = document.querySelector('.form-section.active');
+            return parseInt(activeSection.id.replace('step', ''), 10);
+        }
+
+        function handleStepClick(targetStep) {
+            const currentStep = getCurrentStep();
+
+            // Moving backward (or clicking the current step) never needs validation
+            if (targetStep <= currentStep) {
+                goToStep(targetStep);
+                return;
+            }
+
+            // Moving forward: every step in between must be valid first
+            for (let step = currentStep; step < targetStep; step++) {
+                if (!validateStep(step)) {
+                    if (step !== currentStep) goToStep(step);
+                    return;
+                }
+            }
+            goToStep(targetStep);
+        }
+
+        function handleSubmit() {
+            if (validateStep(3)) {
+                submitForm();
+            }
+        }
     </script>
 </body>
 </html>

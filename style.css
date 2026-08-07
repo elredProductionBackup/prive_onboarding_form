@@ -384,6 +384,33 @@ select {
     color: #999999;
 }
 
+.file-upload.drag-over {
+    border-color: #BA8A3D;
+    background-color: #FEF5E7;
+}
+
+.file-upload.has-file {
+    border-style: solid;
+    border-color: #BA8A3D;
+    background-color: #FFF9F2;
+}
+
+.file-upload.has-file .upload-text {
+    color: #BA8A3D;
+    font-weight: 600;
+}
+
+.upload-filename {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #67686B;
+    word-break: break-all;
+}
+
+.group-error .file-upload {
+    border-color: #e05555;
+}
+
 /* Checkbox */
 .checkbox-group {
     display: flex;
@@ -484,6 +511,7 @@ button {
 }
 
 .location-row select,
+.location-row input,
 .location-row button {
     flex: 1;
     min-width: 0;
@@ -556,6 +584,27 @@ button {
 
 #product-tab, #services-tab{
     margin-left: 160px;
+}
+
+/* Validation */
+.was-validated input:invalid,
+.was-validated select:invalid,
+.was-validated textarea:invalid {
+    border-color: #e05555;
+}
+
+.group-error .button-group-inline {
+    margin-bottom: 8px;
+}
+
+.group-error .btn-toggle {
+    border-color: #e05555;
+}
+
+.error-text {
+    color: #e05555;
+    font-size: 12px;
+    margin-top: 6px;
 }
 
 /* Responsive */
