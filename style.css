@@ -26,6 +26,42 @@ body {
     top: 0;
     height: 100vh;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid #e8e8e8;
+}
+
+.logout-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid #DEDEDE;
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: #67686B;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+    border-color: #e05555;
+    color: #e05555;
+    background-color: #FFF5F5;
+}
+
+.logout-btn i {
+    font-size: 18px;
 }
 
 .sidebar-header {
@@ -248,6 +284,10 @@ body {
     grid-template-columns: 1fr 1fr;
     gap: 30px;
     margin-bottom: 20px;
+}
+
+.form-row > .form-group {
+    min-width: 0;
 }
 
 .form-row.full {
@@ -605,6 +645,200 @@ button {
     color: #e05555;
     font-size: 12px;
     margin-top: 6px;
+}
+
+input.error,
+select.error {
+    border-color: #e05555;
+}
+
+.btn-secondary:disabled {
+    border-color: #EBD8B0;
+    color: #DCC593;
+    cursor: not-allowed;
+}
+
+.btn-secondary:disabled:hover {
+    background-color: transparent;
+}
+
+/* Email OTP verification */
+.email-action-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.email-action-row input[type="email"] {
+    flex: 1;
+}
+
+.email-action-row input[type="email"]:disabled {
+    background-color: #FAFAFA;
+    color: #666666;
+}
+
+.email-action-row button {
+    white-space: nowrap;
+}
+
+.email-verified-badge {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    color: #009817;
+    font-weight: 600;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.email-verified-badge img {
+    display: block;
+}
+
+.email-otp-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333333;
+    margin-bottom: 8px;
+}
+
+.email-otp-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+}
+
+.email-otp-row input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 12px 14px;
+    border: 1px solid #DEDEDE;
+    border-radius: 6px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: #333333;
+    letter-spacing: 2px;
+}
+
+.email-otp-row input:placeholder-shown {
+    letter-spacing: normal;
+}
+
+.email-otp-row input:focus {
+    outline: none;
+    border-color: #BA8A3D;
+    box-shadow: 0 0 0 3px rgba(196, 167, 71, 0.1);
+}
+
+.email-otp-row input.error {
+    border-color: #e05555;
+}
+
+.email-otp-row .btn-secondary {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+#emailActionBtn,
+#emailVerifyBtn {
+    min-width: 155px;
+    text-align: center;
+}
+
+/* Profile image upload */
+.avatar-upload {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    cursor: pointer;
+}
+
+.avatar-preview {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #FEF5E7;
+    border: 1px solid #DEDEDE;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #BA8A3D;
+    overflow: hidden;
+}
+
+.avatar-preview i {
+    font-size: 36px;
+}
+
+.avatar-preview.has-image {
+    border-color: #BA8A3D;
+}
+
+.avatar-edit-badge {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background-color: #BA8A3D;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ffffff;
+}
+
+.avatar-edit-badge i {
+    font-size: 14px;
+}
+
+/* Single-file identity proof dropzone */
+.file-upload.single-upload {
+    padding: 50px 20px;
+}
+
+/* Toast notifications */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 2000;
+}
+
+.toast {
+    min-width: 240px;
+    max-width: 360px;
+    padding: 14px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #ffffff;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    transform: translateY(-12px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast-error {
+    background-color: #e05555;
+}
+
+.toast-success {
+    background-color: #BA8A3D;
 }
 
 /* Responsive */

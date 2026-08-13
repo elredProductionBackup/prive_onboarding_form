@@ -14,6 +14,8 @@
     </style>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <script src="auth.js"></script>
+    <script>requireAuth();</script>
 </head>
 <body>
     <div class="container">
@@ -26,11 +28,11 @@
 
             <div class="progress-section">
                 <div class="progress-header">
-                    <span id="stepText">Step 1 of 3</span>
-                    <span id="percentText">33% Complete</span>
+                    <span id="stepText">Step 1 of 4</span>
+                    <span id="percentText">25% Complete</span>
                 </div>
                 <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill" style="width: 33%;"></div>
+                    <div class="progress-fill" id="progressFill" style="width: 25%;"></div>
                 </div>
             </div>
 
@@ -58,6 +60,21 @@
                         <p>Additional information</p>
                     </div>
                 </div>
+
+                <div class="step" data-step="4" onclick="handleStepClick(4)">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Share your problem</h3>
+                        <p>Share your problem</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <button class="logout-btn" onclick="logout()">
+                    <i class="material-icons">logout</i>
+                    Log out
+                </button>
             </div>
         </div>
 
@@ -87,47 +104,134 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="firstName">First Name</label>
-                        <input type="text" id="firstName" placeholder="e.g. John" required minlength="2" title="First name must be at least 2 characters">
+                        <input type="text" id="firstName" placeholder="e.g. John" required minlength="2" pattern="^[A-Za-z .'\-]+$" title="First name must be at least 2 letters">
                     </div>
                     <div class="form-group">
                         <label for="lastName">Last Name</label>
-                        <input type="text" id="lastName" placeholder="e.g. Smith" required minlength="2" title="Last name must be at least 2 characters">
+                        <input type="text" id="lastName" placeholder="e.g. Smith" required minlength="2" pattern="^[A-Za-z .'\-]+$" title="Last name must be at least 2 letters">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="dob">Date of Birth</label>
-                        <input type="text" id="dob" placeholder="DD/MM/YYYY" required inputmode="numeric" pattern="^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/\d{4}$" title="Please enter date in DD/MM/YYYY format">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" placeholder="Enter username" required minlength="3" maxlength="20" pattern="^[a-zA-Z0-9_]{3,20}$" title="3-20 characters: letters, numbers, underscore only">
                     </div>
-                    <div class="form-group">
-                        <label for="mobile">Mobile</label>
-                        <div style="display: flex; gap: 8px;">
-                            <select id="mobileCode" style="max-width: 80px;" required>
-                                <option selected>+91</option>
-                                <option>+1</option>
-                                <option>+44</option>
-                            </select>
-                            <input type="tel" id="mobile" placeholder="10 digit mobile number" style="flex: 1;" required inputmode="numeric" pattern="^\d{10}$" title="Please enter a valid 10 digit mobile number">
+                    <div class="form-group" id="emailFieldGroup">
+                        <label for="email" id="emailLabel">E-mail</label>
+                        <div class="email-action-row" id="emailActionRow">
+                            <input type="email" id="email" placeholder="email@example.com" required title="Please enter a valid email address">
+                            <button type="button" class="btn-secondary" id="emailActionBtn" onclick="sendEmailOtp()">Validate email</button>
+                            <span class="email-verified-badge" id="emailVerifiedBadge">
+                                <img src="icons/verified.svg" alt="" width="18" height="18"> Email verified
+                            </span>
+                        </div>
+
+                        <div class="email-otp-block" id="emailOtpBlock" style="display: none;">
+                            <label class="email-otp-label" for="emailOtpInput">Enter OTP sent to <span id="emailOtpMasked"></span></label>
+                            <div class="email-otp-row">
+                                <input type="text" id="emailOtpInput" placeholder="Enter 6 digit OTP" maxlength="6" inputmode="numeric" pattern="^\d{6}$" title="Please enter the 6 digit OTP">
+                                <button type="button" class="btn-secondary" id="emailVerifyBtn" onclick="verifyEmailOtp()" disabled>Verify OTP</button>
+                            </div>
+                            <p class="error-text" id="emailOtpError" style="display: none;"></p>
                         </div>
                     </div>
                 </div>
 
-                <div class="form-row full">
+                <div class="form-row three-column">
                     <div class="form-group">
-                        <label for="email">E-mail</label>
-                        <input type="email" id="email" placeholder="email@example.com" required title="Please enter a valid email address">
+                        <label for="linkedin">Linkedin profile URL</label>
+                        <input type="text" id="linkedin" placeholder="https://linkedin.com/in/username" required pattern="^https?:\/\/([a-z]{2,3}\.)?linkedin\.com\/.+$" title="Please enter a valid LinkedIn profile URL">
+                    </div>
+                    <div class="form-group">
+                        <label for="dob">Date of Birth</label>
+                        <input type="text" id="dob" placeholder="DD/MM/YYYY" required inputmode="numeric" pattern="^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/\d{4}$" title="Please enter date in DD/MM/YYYY format">
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select id="gender" required>
+                            <option value="" selected disabled>Select</option>
+                            <option>Male</option>
+                            <option>Female</option>
+                            <option>Other</option>
+                            <option>Prefer not to say</option>
+                        </select>
                     </div>
                 </div>
 
                 <div class="form-row four-column">
                     <div class="form-group">
                         <label for="city">City</label>
-                        <input type="text" id="city" placeholder="Enter your city" required minlength="2" pattern="^[^0-9]+$" title="City cannot contain numbers">
+                        <input type="text" id="city" list="cityOptions" placeholder="Select city" required minlength="2" pattern="^[^0-9]+$" title="City cannot contain numbers">
+                        <datalist id="cityOptions">
+                            <option>Mumbai</option>
+                            <option>Delhi</option>
+                            <option>Bengaluru</option>
+                            <option>Hyderabad</option>
+                            <option>Ahmedabad</option>
+                            <option>Chennai</option>
+                            <option>Kolkata</option>
+                            <option>Surat</option>
+                            <option>Pune</option>
+                            <option>Jaipur</option>
+                            <option>Lucknow</option>
+                            <option>Kanpur</option>
+                            <option>Nagpur</option>
+                            <option>Indore</option>
+                            <option>Thane</option>
+                            <option>Bhopal</option>
+                            <option>Visakhapatnam</option>
+                            <option>Vadodara</option>
+                            <option>Ghaziabad</option>
+                            <option>Chandigarh</option>
+                            <option>Coimbatore</option>
+                            <option>Kochi</option>
+                            <option>Gurugram</option>
+                            <option>Noida</option>
+                        </datalist>
                     </div>
                     <div class="form-group">
                         <label for="state">State</label>
-                        <input type="text" id="state" placeholder="Enter your state" required minlength="2" pattern="^[^0-9]+$" title="State cannot contain numbers">
+                        <select id="state" required>
+                            <option value="" selected disabled>Select state</option>
+                            <option>Andaman and Nicobar Islands</option>
+                            <option>Andhra Pradesh</option>
+                            <option>Arunachal Pradesh</option>
+                            <option>Assam</option>
+                            <option>Bihar</option>
+                            <option>Chandigarh</option>
+                            <option>Chhattisgarh</option>
+                            <option>Dadra and Nagar Haveli and Daman and Diu</option>
+                            <option>Delhi</option>
+                            <option>Goa</option>
+                            <option>Gujarat</option>
+                            <option>Haryana</option>
+                            <option>Himachal Pradesh</option>
+                            <option>Jammu and Kashmir</option>
+                            <option>Jharkhand</option>
+                            <option>Karnataka</option>
+                            <option>Kerala</option>
+                            <option>Ladakh</option>
+                            <option>Lakshadweep</option>
+                            <option>Madhya Pradesh</option>
+                            <option>Maharashtra</option>
+                            <option>Manipur</option>
+                            <option>Meghalaya</option>
+                            <option>Mizoram</option>
+                            <option>Nagaland</option>
+                            <option>Odisha</option>
+                            <option>Puducherry</option>
+                            <option>Punjab</option>
+                            <option>Rajasthan</option>
+                            <option>Sikkim</option>
+                            <option>Tamil Nadu</option>
+                            <option>Telangana</option>
+                            <option>Tripura</option>
+                            <option>Uttar Pradesh</option>
+                            <option>Uttarakhand</option>
+                            <option>West Bengal</option>
+                            <option>Other</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="pin">PIN / ZIP Code</label>
@@ -135,53 +239,157 @@
                     </div>
                     <div class="form-group">
                         <label for="country">Country</label>
-                        <input type="text" id="country" placeholder="Enter your country" required minlength="2" pattern="^[^0-9]+$" title="Country cannot contain numbers">
+                        <select id="country" required>
+                            <option value="" selected disabled>Select country</option>
+                            <option selected>India</option>
+                            <option>Afghanistan</option>
+                            <option>Albania</option>
+                            <option>Algeria</option>
+                            <option>Argentina</option>
+                            <option>Armenia</option>
+                            <option>Australia</option>
+                            <option>Austria</option>
+                            <option>Azerbaijan</option>
+                            <option>Bahrain</option>
+                            <option>Bangladesh</option>
+                            <option>Belarus</option>
+                            <option>Belgium</option>
+                            <option>Bhutan</option>
+                            <option>Bolivia</option>
+                            <option>Brazil</option>
+                            <option>Brunei</option>
+                            <option>Bulgaria</option>
+                            <option>Cambodia</option>
+                            <option>Cameroon</option>
+                            <option>Canada</option>
+                            <option>Chile</option>
+                            <option>China</option>
+                            <option>Colombia</option>
+                            <option>Croatia</option>
+                            <option>Cuba</option>
+                            <option>Cyprus</option>
+                            <option>Czechia</option>
+                            <option>Denmark</option>
+                            <option>Ecuador</option>
+                            <option>Egypt</option>
+                            <option>Estonia</option>
+                            <option>Ethiopia</option>
+                            <option>Fiji</option>
+                            <option>Finland</option>
+                            <option>France</option>
+                            <option>Georgia</option>
+                            <option>Germany</option>
+                            <option>Ghana</option>
+                            <option>Greece</option>
+                            <option>Hong Kong</option>
+                            <option>Hungary</option>
+                            <option>Iceland</option>
+                            <option>Indonesia</option>
+                            <option>Iran</option>
+                            <option>Iraq</option>
+                            <option>Ireland</option>
+                            <option>Israel</option>
+                            <option>Italy</option>
+                            <option>Japan</option>
+                            <option>Jordan</option>
+                            <option>Kazakhstan</option>
+                            <option>Kenya</option>
+                            <option>Kuwait</option>
+                            <option>Kyrgyzstan</option>
+                            <option>Laos</option>
+                            <option>Latvia</option>
+                            <option>Lebanon</option>
+                            <option>Lithuania</option>
+                            <option>Luxembourg</option>
+                            <option>Malaysia</option>
+                            <option>Maldives</option>
+                            <option>Malta</option>
+                            <option>Mauritius</option>
+                            <option>Mexico</option>
+                            <option>Moldova</option>
+                            <option>Monaco</option>
+                            <option>Mongolia</option>
+                            <option>Morocco</option>
+                            <option>Myanmar</option>
+                            <option>Nepal</option>
+                            <option>Netherlands</option>
+                            <option>New Zealand</option>
+                            <option>Nigeria</option>
+                            <option>North Korea</option>
+                            <option>Norway</option>
+                            <option>Oman</option>
+                            <option>Pakistan</option>
+                            <option>Palestine</option>
+                            <option>Panama</option>
+                            <option>Peru</option>
+                            <option>Philippines</option>
+                            <option>Poland</option>
+                            <option>Portugal</option>
+                            <option>Qatar</option>
+                            <option>Romania</option>
+                            <option>Russia</option>
+                            <option>Saudi Arabia</option>
+                            <option>Serbia</option>
+                            <option>Singapore</option>
+                            <option>Slovakia</option>
+                            <option>Slovenia</option>
+                            <option>South Africa</option>
+                            <option>South Korea</option>
+                            <option>Spain</option>
+                            <option>Sri Lanka</option>
+                            <option>Sudan</option>
+                            <option>Sweden</option>
+                            <option>Switzerland</option>
+                            <option>Syria</option>
+                            <option>Taiwan</option>
+                            <option>Tajikistan</option>
+                            <option>Tanzania</option>
+                            <option>Thailand</option>
+                            <option>Tunisia</option>
+                            <option>Turkey</option>
+                            <option>Turkmenistan</option>
+                            <option>Uganda</option>
+                            <option>Ukraine</option>
+                            <option>United Arab Emirates</option>
+                            <option>United Kingdom</option>
+                            <option>United States</option>
+                            <option>Uruguay</option>
+                            <option>Uzbekistan</option>
+                            <option>Venezuela</option>
+                            <option>Vietnam</option>
+                            <option>Yemen</option>
+                            <option>Zambia</option>
+                            <option>Zimbabwe</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Upload your image</label>
+                    <div class="avatar-upload" onclick="triggerAvatarUpload()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleAvatarDrop(event)">
+                        <input type="file" id="profileImage" accept="image/*" style="display:none" onchange="handleAvatarSelect(this)">
+                        <div class="avatar-preview" id="avatarPreview">
+                            <i class="material-icons">person</i>
+                        </div>
+                        <div class="avatar-edit-badge">
+                            <i class="material-icons">photo_camera</i>
+                        </div>
                     </div>
                 </div>
 
                 <h3 class="form-title">Identity Proof</h3>
-                <p class="form-subtitle">Kindly share your identity proof such as aadhar, passport</p>
+                <p class="form-subtitle">Kindly share your identity proof such as aadhar, passport, driving license</p>
 
                 <div class="form-group required-group" data-group-name="Identity Proof" data-check="files">
-                    <div class="file-upload-container">
-                        <div class="file-upload" onclick="triggerFileUpload(this)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleFileDrop(event, this)">
-                            <input type="file" id="idProofPassport" class="file-upload-input" accept="image/*,.pdf" style="display:none" onchange="handleFileSelect(this)">
-                            <div class="upload-icon">
-                                <i class="material-icons">cloud_upload</i>
-                            </div>
-                            <div class="upload-text">Click to upload or Drag and drop</div>
-                            <div class="upload-filename"></div>
+                    <div class="file-upload single-upload" onclick="triggerFileUpload(this)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleFileDrop(event, this)">
+                        <input type="file" id="idProof" class="file-upload-input" accept="image/*,.pdf" style="display:none" onchange="handleFileSelect(this)">
+                        <div class="upload-icon">
+                            <i class="material-icons">file_upload</i>
                         </div>
-                        <div class="file-upload" onclick="triggerFileUpload(this)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleFileDrop(event, this)">
-                            <input type="file" id="idProofDrivingLicense" class="file-upload-input" accept="image/*,.pdf" style="display:none" onchange="handleFileSelect(this)">
-                            <div class="upload-icon">
-                                <i class="material-icons">cloud_upload</i>
-                            </div>
-                            <div class="upload-text">Click to upload or Drag and drop</div>
-                            <div class="upload-filename"></div>
-                        </div>
-                        <div class="file-upload" onclick="triggerFileUpload(this)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleFileDrop(event, this)">
-                            <input type="file" id="idProofNationalId" class="file-upload-input" accept="image/*,.pdf" style="display:none" onchange="handleFileSelect(this)">
-                            <div class="upload-icon">
-                                <i class="material-icons">cloud_upload</i>
-                            </div>
-                            <div class="upload-text">Click to upload or Drag and drop</div>
-                            <div class="upload-filename"></div>
-                        </div>
+                        <div class="upload-text">Drag &amp; drop file here, or click to browse</div>
+                        <div class="upload-filename"></div>
                     </div>
-
-                    <div class="form-row three-column" style="margin-top: 15px;">
-                        <div style="text-align: center;">
-                            <label style="text-align: center; margin-bottom: 0;">Passport</label>
-                        </div>
-                        <div style="text-align: center;">
-                            <label style="text-align: center; margin-bottom: 0;">Driving License</label>
-                        </div>
-                        <div style="text-align: center;">
-                            <label style="text-align: center; margin-bottom: 0;">National ID</label>
-                        </div>
-                    </div>
-                    <p class="form-subtitle" style="margin-top: 10px; margin-bottom: 0;">Please upload at least one of the above documents.</p>
                 </div>
 
                 <div class="checkbox-group">
@@ -192,8 +400,8 @@
                 </div>
 
                 <div class="button-group">
-                    <button class="btn-secondary" onclick="goToStep(1)">Save Draft</button>
-                    <button class="btn-primary" onclick="handleNext(1, 2)">Next →</button>
+                    <button class="btn-secondary btn-icon" onclick="goToStep(1)">Save Draft <i class="material-icons" style="font-size: 18px;">bookmark_border</i></button>
+                    <button class="btn-primary btn-icon" onclick="handleNext(1, 2)">Next <i class="material-icons" style="font-size: 18px;">arrow_forward</i></button>
                 </div>
             </div>
 
@@ -277,36 +485,18 @@
                     </div>
                 </div>
 
-                <h3 class="form-title">Partnerships & Collaboration</h3>
-                <p class="form-subtitle">An important part of Privé is about us building an ecosystem. Global relevance is not built through isolated successes. It is earned by building complete ecosystems; research, manufacturing, and resilient supply chains.</p>
+               
+                <!-- Channel partner industries -->
+                <h3 class="form-title">I am looking for channel partner from these industries</h3>
 
-                <!-- What kind of partners -->
-                <div class="form-group required-group" data-group-name="Kind of partners or collaboration">
-                    <label>What kind of partners or collaboration would you seek from the members?</label>
-                    <div class="button-group-inline">
-                        <button class="btn-toggle" onclick="toggleButton(this)">Suppliers</button>
-                        <button class="btn-toggle" onclick="toggleButton(this)">Distributors</button>
-                        <button class="btn-toggle" onclick="toggleButton(this)">Retailers</button>
-                        <button class="btn-toggle" onclick="toggleButton(this)">Investors</button>
-                        <button class="btn-toggle" onclick="toggleButton(this)">Consultants</button>
-                    </div>
+                <div class="form-group">
+                    <label for="channelPartnerLocation">Location where you are open for Distributors / Channel Partners</label>
+                    <input type="text" id="channelPartnerLocation" placeholder="Enter location" pattern="^[^0-9]+$" title="Location cannot contain numbers">
                 </div>
 
-                <!-- Add location -->
                 <div class="form-group">
-                    <label>Add location</label>
-                    <div class="location-row">
-                        <input type="text" id="partnerCity" placeholder="City" required minlength="2" pattern="^[^0-9]+$" title="City cannot contain numbers">
-                        <input type="text" id="partnerCountry" placeholder="Country" required minlength="2" pattern="^[^0-9]+$" title="Country cannot contain numbers">
-                        <button class="btn-toggle" onclick="toggleButton(this)">Worldwide</button>
-                        <button class="btn-toggle" onclick="toggleButton(this)">Remote</button>
-                    </div>
-                </div>
-
-                <!-- Industries -->
-                <div class="form-group">
-                    <label>I am open to partnership with the following industries</label>
-                    <textarea id="industries" required style="width: 100%; padding: 12px 14px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; color: #333333; resize: vertical; min-height: 60px;" placeholder="Add industry"></textarea>
+                    <label>Short note on what kind partnerships you open for</label>
+                    <textarea id="channelPartnerNote" style="width: 100%; padding: 12px 14px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; color: #333333; resize: vertical; min-height: 60px;" placeholder="Short note"></textarea>
                 </div>
 
                 <!-- What are you looking in a partner -->
@@ -389,22 +579,30 @@
                     </div>
                 </div>
 
-                <!-- Problem Statement -->
+               
+
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="goToStep(2)">← Back</button>
+                    <button class="btn-secondary btn-icon" onclick="goToStep(3)">Save Draft <i class="material-icons" style="font-size: 18px;">bookmark_border</i></button>
+                    <button class="btn-primary btn-icon" onclick="handleNext(3, 4)">Next <i class="material-icons" style="font-size: 18px;">arrow_forward</i></button>
+                </div>
+            </div>
+
+            <!-- STEP 4: SHARE YOUR PROBLEM -->
+            <div class="form-section" id="step4">
+                <div class="form-section-header">
+                    <div class="section-icon">
+                        <i class="material-icons">help_center</i>
+                    </div>
+                    <div>
+                        <h2 class="section-title">Share your problem</h2>
+                        <p class="section-subtitle">An important focus of our network is to come together and help solve each other's problems. Kindly share a problem which is of current relevance to you.</p>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label>Is there a problem you would like members of Privé to help you solve ? (Kindly do note that this would get shared within the Privé network for peers to help you)</label>
                     <textarea id="problemStatement" required style="width: 100%; padding: 12px 14px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; color: #333333; resize: vertical; min-height: 100px;" placeholder="Share your problem"></textarea>
-                </div>
-
-                <!-- Signature and Date -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="signature">Signature (type full name to confirm)</label>
-                        <input type="text" id="signature" placeholder="Full name" required minlength="2">
-                    </div>
-                    <div class="form-group">
-                        <label for="signDate">Date</label>
-                        <input type="text" id="signDate" placeholder="DD/MM/YYYY" required inputmode="numeric" pattern="^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/\d{4}$" title="Please enter date in DD/MM/YYYY format">
-                    </div>
                 </div>
 
                 <div style="text-align: center; margin-top: 50px;">
@@ -437,21 +635,28 @@
             });
 
             // Update progress
-            const progressPercentages = [33, 67, 100];
+            const progressPercentages = [25, 50, 75, 100];
             const progressTexts = [
-                'Step 1 of 3',
-                'Step 2 of 3',
-                'Step 3 of 3'
+                'Step 1 of 4',
+                'Step 2 of 4',
+                'Step 3 of 4',
+                'Step 4 of 4'
             ];
             const percentTexts = [
-                '33% Complete',
-                '67% Complete',
+                '25% Complete',
+                '50% Complete',
+                '75% Complete',
                 '100% Complete'
             ];
 
             document.getElementById('progressFill').style.width = progressPercentages[step - 1] + '%';
             document.getElementById('stepText').textContent = progressTexts[step - 1];
             document.getElementById('percentText').textContent = percentTexts[step - 1];
+
+            // Keep the current step in the URL so a page reload restores it
+            const url = new URL(window.location.href);
+            url.searchParams.set('step', step);
+            history.replaceState(null, '', url);
 
             // Scroll to top
             window.scrollTo(0, 0);
@@ -538,8 +743,15 @@
                 el.value = el.value.replace(/\D/g, '').slice(0, maxLen);
             });
         }
-        restrictToDigits(document.getElementById('mobile'), 10);
         restrictToDigits(document.getElementById('pin'), 10);
+
+        function restrictToPattern(el, regex) {
+            if (!el) return;
+            el.addEventListener('input', () => {
+                el.value = el.value.replace(regex, '');
+            });
+        }
+        restrictToPattern(document.getElementById('username'), /[^a-zA-Z0-9_]/g);
 
         function attachDateMask(el) {
             if (!el) return;
@@ -564,9 +776,121 @@
                 el.value = el.value.replace(/[0-9]/g, '');
             });
         }
-        ['city', 'state', 'country', 'companyLocation', 'partnerCity', 'partnerCountry', 'manufacturingLocation'].forEach(id => {
+        ['city', 'companyLocation', 'partnerCity', 'partnerCountry', 'manufacturingLocation', 'channelPartnerLocation'].forEach(id => {
             restrictNoDigits(document.getElementById(id));
         });
+
+        // ---------- Email OTP verification ----------
+        const EMAIL_OTP = '123456';
+        let emailVerified = false;
+
+        function maskEmail(email) {
+            const [local, domain] = email.split('@');
+            if (!domain) return email;
+            const visible = local.slice(0, 3);
+            return visible + '*'.repeat(Math.max(local.length - 3, 3)) + '@' + domain;
+        }
+
+        function sendEmailOtp() {
+            const emailInput = document.getElementById('email');
+            const email = emailInput.value.trim();
+            const validPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+            if (!validPattern.test(email)) {
+                emailInput.setCustomValidity('Please enter a valid email address.');
+                emailInput.classList.add('error');
+                emailInput.reportValidity();
+                showToast('Please enter a valid email address.');
+                return;
+            }
+            emailInput.setCustomValidity('');
+            emailInput.classList.remove('error');
+
+            const otpInput = document.getElementById('emailOtpInput');
+            otpInput.value = '';
+            otpInput.classList.remove('error');
+
+            document.getElementById('emailLabel').style.display = 'none';
+            document.getElementById('emailActionRow').style.display = 'none';
+            document.getElementById('emailOtpBlock').style.display = 'block';
+            document.getElementById('emailOtpMasked').textContent = maskEmail(email);
+            document.getElementById('emailOtpError').style.display = 'none';
+            document.getElementById('emailVerifyBtn').disabled = true;
+
+            otpInput.focus();
+            showToast('OTP sent to your email.', 'success');
+        }
+
+        (function setupEmailOtpInput() {
+            const otpInput = document.getElementById('emailOtpInput');
+            const otpError = document.getElementById('emailOtpError');
+
+            otpInput.addEventListener('input', () => {
+                otpInput.value = otpInput.value.replace(/\D/g, '').slice(0, 6);
+                otpInput.classList.remove('error');
+                otpError.style.display = 'none';
+                document.getElementById('emailVerifyBtn').disabled = otpInput.value.length !== 6;
+            });
+        })();
+
+        function verifyEmailOtp() {
+            const otpInput = document.getElementById('emailOtpInput');
+            const entered = otpInput.value;
+            const otpError = document.getElementById('emailOtpError');
+
+            if (entered !== EMAIL_OTP) {
+                otpInput.classList.add('error');
+                otpError.textContent = 'Incorrect OTP. Please try again.';
+                otpError.style.display = 'block';
+                showToast('Incorrect OTP. Please try again.');
+                return;
+            }
+
+            emailVerified = true;
+            document.getElementById('emailOtpBlock').style.display = 'none';
+            document.getElementById('emailLabel').style.display = 'block';
+            document.getElementById('emailActionRow').style.display = 'flex';
+            document.getElementById('email').disabled = true;
+            document.getElementById('emailActionBtn').style.display = 'none';
+            document.getElementById('emailVerifiedBadge').style.display = 'inline-flex';
+            showToast('Email verified successfully.', 'success');
+        }
+
+        // ---------- Profile image upload ----------
+        function triggerAvatarUpload() {
+            document.getElementById('profileImage').click();
+        }
+
+        function renderAvatarPreview(file) {
+            if (!file.type.startsWith('image/')) {
+                showToast('Please upload a valid image file.');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const preview = document.getElementById('avatarPreview');
+                preview.style.backgroundImage = 'url(' + e.target.result + ')';
+                preview.classList.add('has-image');
+                preview.innerHTML = '';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleAvatarSelect(input) {
+            if (input.files && input.files[0]) {
+                renderAvatarPreview(input.files[0]);
+            }
+        }
+
+        function handleAvatarDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            const file = e.dataTransfer.files && e.dataTransfer.files[0];
+            if (file) {
+                document.getElementById('profileImage').files = e.dataTransfer.files;
+                renderAvatarPreview(file);
+            }
+        }
 
         // ---------- Identity Proof file uploads ----------
         function triggerFileUpload(dropzone) {
@@ -583,7 +907,9 @@
                 filenameEl.textContent = input.files[0].name;
             } else {
                 dropzone.classList.remove('has-file');
-                textEl.textContent = 'Click to upload or Drag and drop';
+                textEl.textContent = dropzone.classList.contains('single-upload')
+                    ? 'Drag & drop file here, or click to browse'
+                    : 'Click to upload or Drag and drop';
                 filenameEl.textContent = '';
             }
             const group = dropzone.closest('.required-group');
@@ -701,6 +1027,13 @@
                 firstInvalidGroup.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return false;
             }
+
+            if (stepNumber === 1 && !emailVerified) {
+                showToast('Please verify your email with OTP before proceeding.');
+                document.getElementById('emailFieldGroup').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return false;
+            }
+
             return true;
         }
 
@@ -735,10 +1068,19 @@
         }
 
         function handleSubmit() {
-            if (validateStep(3)) {
+            if (validateStep(4)) {
                 submitForm();
             }
         }
+
+        // ---------- Restore step from URL on reload ----------
+        (function restoreStepFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const step = parseInt(params.get('step'), 10);
+            if (step >= 1 && step <= 4) {
+                goToStep(step);
+            }
+        })();
     </script>
 </body>
 </html>

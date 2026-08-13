@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privé - Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'Mencken Std';
+            src: url('mencken-std.otf') format('opentype');
+            font-weight: 400;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="auth.css">
+</head>
+<body>
+    <div class="auth-page">
+        <img src="logo.svg" alt="Privé" class="auth-logo-img">
+        <p class="auth-tagline">A network of extraordinary minds.</p>
+        <p class="auth-subtagline">Built on trust. Driven by impact.</p>
+
+        <div class="auth-card">
+            <h1 class="auth-card-title">Let's get started</h1>
+            <p class="auth-card-subtitle">Enter your mobile number to receive a verification code and begin your Prive journey.</p>
+
+            <form id="loginForm" novalidate>
+                <div class="auth-form-group">
+                    <label for="mobile">Mobile number</label>
+                    <input type="tel" id="mobile" class="auth-input" placeholder="Enter mobile number" inputmode="numeric" required>
+                    <p class="auth-error-text" id="mobileError">Please enter a valid 10 digit mobile number.</p>
+                </div>
+
+                <button type="submit" class="auth-btn-primary">
+                    Verify with OTP
+                    <i class="material-icons" style="font-size: 18px;">arrow_forward</i>
+                </button>
+            </form>
+        </div>
+
+        <p class="auth-footnote">
+            <img src="icons/certified.svg" alt="" width="18" height="18">
+            Your number is safe with us. We'll never share it with anyone.
+        </p>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        redirectIfAuthenticated();
+
+        const mobileInput = document.getElementById('mobile');
+        const mobileError = document.getElementById('mobileError');
+
+        mobileInput.addEventListener('input', () => {
+            mobileInput.value = mobileInput.value.replace(/\D/g, '').slice(0, 10);
+            mobileError.classList.remove('visible');
+            mobileInput.classList.remove('error');
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const mobile = mobileInput.value.trim();
+            if (!/^\d{10}$/.test(mobile)) {
+                mobileError.classList.add('visible');
+                mobileInput.focus();
+                showToast('Please enter a valid 10 digit mobile number.');
+                return;
+            }
+            sessionStorage.setItem('privePendingMobile', '+91' + mobile);
+            window.location.href = 'otp.html';
+        });
+    </script>
+</body>
+</html>
