@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Privé - Membership Application</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:wght@400;500&display=swap"
+        rel="stylesheet">
     <style>
         @font-face {
             font-family: 'Mencken Std';
@@ -17,6 +19,7 @@
     <script src="auth.js"></script>
     <script>requireAuth();</script>
 </head>
+
 <body>
     <div class="container">
         <!-- Sidebar -->
@@ -80,7 +83,8 @@
 
         <!-- Main Content -->
         <div class="main-content">
-            <button class="mobile-menu-btn" onclick="toggleSidebar()" style="display: none; position: fixed; top: 20px; left: 20px; z-index: 999; background: none; border: none; cursor: pointer; font-size: 24px;">
+            <button class="mobile-menu-btn" onclick="toggleSidebar()"
+                style="display: none; position: fixed; top: 20px; left: 20px; z-index: 999; background: none; border: none; cursor: pointer; font-size: 24px;">
                 <i class="material-icons">menu</i>
             </button>
             <div class="header">
@@ -104,34 +108,43 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="firstName">First Name</label>
-                        <input type="text" id="firstName" placeholder="e.g. John" required minlength="2" pattern="^[A-Za-z .'\-]+$" title="First name must be at least 2 letters">
+                        <input type="text" id="firstName" placeholder="e.g. John" required minlength="2"
+                            pattern="^[A-Za-z .'\-]+$" title="First name must be at least 2 letters">
                     </div>
                     <div class="form-group">
                         <label for="lastName">Last Name</label>
-                        <input type="text" id="lastName" placeholder="e.g. Smith" required minlength="2" pattern="^[A-Za-z .'\-]+$" title="Last name must be at least 2 letters">
+                        <input type="text" id="lastName" placeholder="e.g. Smith" required minlength="2"
+                            pattern="^[A-Za-z .'\-]+$" title="Last name must be at least 2 letters">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="username">Username</label>
-                        <input type="text" id="username" placeholder="Enter username" required minlength="3" maxlength="20" pattern="^[a-zA-Z0-9_]{3,20}$" title="3-20 characters: letters, numbers, underscore only">
+                        <input type="text" id="username" placeholder="Enter username" required minlength="3"
+                            maxlength="20" pattern="^[a-zA-Z0-9_]{3,20}$"
+                            title="3-20 characters: letters, numbers, underscore only">
                     </div>
                     <div class="form-group" id="emailFieldGroup">
                         <label for="email" id="emailLabel">E-mail</label>
                         <div class="email-action-row" id="emailActionRow">
-                            <input type="email" id="email" placeholder="email@example.com" required title="Please enter a valid email address">
-                            <button type="button" class="btn-secondary" id="emailActionBtn" onclick="sendEmailOtp()">Validate email</button>
+                            <input type="email" id="email" placeholder="email@example.com" required
+                                title="Please enter a valid email address">
+                            <button type="button" class="btn-secondary" id="emailActionBtn"
+                                onclick="sendEmailOtp()">Validate email</button>
                             <span class="email-verified-badge" id="emailVerifiedBadge">
                                 <img src="icons/verified.svg" alt="" width="18" height="18"> Email verified
                             </span>
                         </div>
 
                         <div class="email-otp-block" id="emailOtpBlock" style="display: none;">
-                            <label class="email-otp-label" for="emailOtpInput">Enter OTP sent to <span id="emailOtpMasked"></span></label>
+                            <label class="email-otp-label" for="emailOtpInput">Enter OTP sent to <span
+                                    id="emailOtpMasked"></span></label>
                             <div class="email-otp-row">
-                                <input type="text" id="emailOtpInput" placeholder="Enter 6 digit OTP" maxlength="6" inputmode="numeric" pattern="^\d{6}$" title="Please enter the 6 digit OTP">
-                                <button type="button" class="btn-secondary" id="emailVerifyBtn" onclick="verifyEmailOtp()" disabled>Verify OTP</button>
+                                <input type="text" id="emailOtpInput" placeholder="Enter 6 digit OTP" maxlength="6"
+                                    inputmode="numeric" pattern="^\d{6}$" title="Please enter the 6 digit OTP">
+                                <button type="button" class="btn-secondary" id="emailVerifyBtn"
+                                    onclick="verifyEmailOtp()" disabled>Verify OTP</button>
                             </div>
                             <p class="error-text" id="emailOtpError" style="display: none;"></p>
                         </div>
@@ -141,11 +154,15 @@
                 <div class="form-row three-column">
                     <div class="form-group">
                         <label for="linkedin">Linkedin profile URL</label>
-                        <input type="text" id="linkedin" placeholder="https://linkedin.com/in/username" required pattern="^https?:\/\/([a-z]{2,3}\.)?linkedin\.com\/.+$" title="Please enter a valid LinkedIn profile URL">
+                        <input type="text" id="linkedin" placeholder="https://linkedin.com/in/username" required
+                            pattern="^https?:\/\/([a-z]{2,3}\.)?linkedin\.com\/.+$"
+                            title="Please enter a valid LinkedIn profile URL">
                     </div>
                     <div class="form-group">
                         <label for="dob">Date of Birth</label>
-                        <input type="text" id="dob" placeholder="DD/MM/YYYY" required inputmode="numeric" pattern="^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/\d{4}$" title="Please enter date in DD/MM/YYYY format">
+                        <input type="text" id="dob" placeholder="DD/MM/YYYY" required inputmode="numeric"
+                            pattern="^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/\d{4}$"
+                            title="Please enter date in DD/MM/YYYY format">
                     </div>
                     <div class="form-group">
                         <label for="gender">Gender</label>
@@ -162,7 +179,8 @@
                 <div class="form-row four-column">
                     <div class="form-group">
                         <label for="city">City</label>
-                        <input type="text" id="city" list="cityOptions" placeholder="Select city" required minlength="2" pattern="^[^0-9]+$" title="City cannot contain numbers">
+                        <input type="text" id="city" list="cityOptions" placeholder="Select city" required minlength="2"
+                            pattern="^[^0-9]+$" title="City cannot contain numbers">
                         <datalist id="cityOptions">
                             <option>Mumbai</option>
                             <option>Delhi</option>
@@ -235,7 +253,8 @@
                     </div>
                     <div class="form-group">
                         <label for="pin">PIN / ZIP Code</label>
-                        <input type="text" id="pin" placeholder="Enter PIN / ZIP Code" required inputmode="numeric" pattern="^\d{4,10}$" title="Please enter a valid numeric PIN / ZIP code">
+                        <input type="text" id="pin" placeholder="Enter PIN / ZIP Code" required inputmode="numeric"
+                            pattern="^\d{4,10}$" title="Please enter a valid numeric PIN / ZIP code">
                     </div>
                     <div class="form-group">
                         <label for="country">Country</label>
@@ -367,8 +386,10 @@
 
                 <div class="form-group">
                     <label>Upload your image</label>
-                    <div class="avatar-upload" onclick="triggerAvatarUpload()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleAvatarDrop(event)">
-                        <input type="file" id="profileImage" accept="image/*" style="display:none" onchange="handleAvatarSelect(this)">
+                    <div class="avatar-upload" onclick="triggerAvatarUpload()" ondragover="handleDragOver(event)"
+                        ondragleave="handleDragLeave(event)" ondrop="handleAvatarDrop(event)">
+                        <input type="file" id="profileImage" accept="image/*" style="display:none"
+                            onchange="handleAvatarSelect(this)">
                         <div class="avatar-preview" id="avatarPreview">
                             <i class="material-icons">person</i>
                         </div>
@@ -382,8 +403,11 @@
                 <p class="form-subtitle">Kindly share your identity proof such as aadhar, passport, driving license</p>
 
                 <div class="form-group required-group" data-group-name="Identity Proof" data-check="files">
-                    <div class="file-upload single-upload" onclick="triggerFileUpload(this)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleFileDrop(event, this)">
-                        <input type="file" id="idProof" class="file-upload-input" accept="image/*,.pdf" style="display:none" onchange="handleFileSelect(this)">
+                    <div class="file-upload single-upload" onclick="triggerFileUpload(this)"
+                        ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
+                        ondrop="handleFileDrop(event, this)">
+                        <input type="file" id="idProof" class="file-upload-input" accept="image/*,.pdf"
+                            style="display:none" onchange="handleFileSelect(this)">
                         <div class="upload-icon">
                             <i class="material-icons">file_upload</i>
                         </div>
@@ -395,13 +419,17 @@
                 <div class="checkbox-group">
                     <input type="checkbox" id="certification" required>
                     <label for="certification" class="checkbox-label">
-                        I certify that the information provided in this application is true and complete to the best of my knowledge, and I understand that any misrepresentation may be grounds for rejection or termination of membership.
+                        I certify that the information provided in this application is true and complete to the best of
+                        my knowledge, and I understand that any misrepresentation may be grounds for rejection or
+                        termination of membership.
                     </label>
                 </div>
 
                 <div class="button-group">
-                    <button class="btn-secondary btn-icon" onclick="goToStep(1)">Save Draft <i class="material-icons" style="font-size: 18px;">bookmark_border</i></button>
-                    <button class="btn-primary btn-icon" onclick="handleNext(1, 2)">Next <i class="material-icons" style="font-size: 18px;">arrow_forward</i></button>
+                    <button class="btn-secondary btn-icon" onclick="goToStep(1)">Save Draft <i class="material-icons"
+                            style="font-size: 18px;">bookmark_border</i></button>
+                    <button class="btn-primary btn-icon" onclick="handleNext(1, 2)">Next <i class="material-icons"
+                            style="font-size: 18px;">arrow_forward</i></button>
                 </div>
             </div>
 
@@ -434,11 +462,14 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="companyLocation">Company location</label>
-                        <input type="text" id="companyLocation" placeholder="Enter company city" required minlength="2" pattern="^[^0-9]+$" title="City cannot contain numbers">
+                        <input type="text" id="companyLocation" placeholder="Enter company city" required minlength="2"
+                            pattern="^[^0-9]+$" title="City cannot contain numbers">
                     </div>
                     <div class="form-group">
                         <label for="websiteUrl">Company's website URL</label>
-                        <input type="text" id="websiteUrl" placeholder="Enter website URL" required pattern="^(https?:\/\/)?([0-9a-zA-Z\-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$" title="Please enter a valid website URL, e.g. https://example.com">
+                        <input type="text" id="websiteUrl" placeholder="Enter website URL" required
+                            pattern="^(https?:\/\/)?([0-9a-zA-Z\-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$"
+                            title="Please enter a valid website URL, e.g. https://example.com">
                     </div>
                 </div>
 
@@ -481,22 +512,34 @@
                     </div>
                     <div>
                         <h2 class="section-title">Partnerships & Collaboration</h2>
-                        <p class="section-subtitle">Help us understand what brings you Privé and what you hope to contribute and gain.</p>
+                        <p class="section-subtitle">Help us understand what brings you Privé and what you hope to
+                            contribute and gain.</p>
                     </div>
                 </div>
 
-               
-                <!-- Channel partner industries -->
-                <h3 class="form-title">I am looking for channel partner from these industries</h3>
 
-                <div class="form-group">
-                    <label for="channelPartnerLocation">Location where you are open for Distributors / Channel Partners</label>
-                    <input type="text" id="channelPartnerLocation" placeholder="Enter location" pattern="^[^0-9]+$" title="Location cannot contain numbers">
+
+
+                <div class="partnershipCollabDiv">
+                    <div class="form-group">
+                        <label for="channelPartnerIndustry">I am looking for channel partner from these
+                            industries</label>
+                        <input type="text" id="channelPartnerIndustry" placeholder="Add industries" pattern="^[^0-9]+$"
+                            title="Location cannot contain numbers">
+                    </div>
+                    <div class="form-group">
+                        <label for="channelPartnerLocation">Location where you are open for Distributors / Channel
+                            Partners</label>
+                        <input type="text" id="channelPartnerLocation" placeholder="Enter location" pattern="^[^0-9]+$"
+                            title="Location cannot contain numbers">
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label>Short note on what kind partnerships you open for</label>
-                    <textarea id="channelPartnerNote" style="width: 100%; padding: 12px 14px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; color: #333333; resize: vertical; min-height: 60px;" placeholder="Short note"></textarea>
+                    <textarea id="channelPartnerNote"
+                        style="width: 100%; padding: 12px 14px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; color: #333333; resize: vertical; min-height: 60px;"
+                        placeholder="Short note"></textarea>
                 </div>
 
                 <!-- What are you looking in a partner -->
@@ -516,12 +559,24 @@
                     <div id="product-tab" class="tab-content">
                         <div style="margin-bottom: 20px;">
                             <div class="checkbox-item">
+                                <input type="checkbox" id="skills" checked class="material-checkbox">
+                                <span class="checkbox-icon checked">
+                                    <i class="material-icons">check_box</i>
+                                </span>
+                                <label for="skills" id="skills_label" style="margin: 0; font-weight: 500;">Skills</label>
+                                <input type="text" id="skills" placeholder="Type your skills"
+                                    pattern="^[^0-9]+$" title="Skills cannot contain numbers"
+                                    style="flex: 1; padding: 8px 12px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px;">
+                            </div>
+                            <div class="checkbox-item">
                                 <input type="checkbox" id="manufacturing" checked class="material-checkbox">
                                 <span class="checkbox-icon checked">
                                     <i class="material-icons">check_box</i>
                                 </span>
                                 <label for="manufacturing" style="margin: 0; font-weight: 500;">Manufacturing</label>
-                                <input type="text" id="manufacturingLocation" placeholder="Enter Location" pattern="^[^0-9]+$" title="Location cannot contain numbers" style="flex: 1; padding: 8px 12px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px;">
+                                <input type="text" id="manufacturingLocation" placeholder="Enter Location"
+                                    pattern="^[^0-9]+$" title="Location cannot contain numbers"
+                                    style="flex: 1; padding: 8px 12px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px;">
                             </div>
                             <div class="checkbox-item">
                                 <input type="checkbox" id="warehouse" class="material-checkbox">
@@ -550,8 +605,10 @@
                                     <i class="material-icons">check_box</i>
                                 </span>
                                 <label for="team" style="margin: 0; font-weight: 500;">Team</label>
-                                <label for="employees" style="margin: 0; font-weight: 500; margin-left: 60px;">Share the number of full time employee</label>
-                                <input type="number" id="employees" placeholder="e.g. 25" style="width: 100px; padding: 8px 12px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px;">
+                                <label for="employees" style="margin: 0; font-weight: 500; margin-left: 60px;">Share the
+                                    number of full time employee</label>
+                                <input type="number" id="employees" placeholder="e.g. 25"
+                                    style="width: 100px; padding: 8px 12px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px;">
                             </div>
                         </div>
                     </div>
@@ -559,6 +616,16 @@
                     <!-- Services Tab Content -->
                     <div id="services-tab" class="tab-content" style="display: none;">
                         <div style="margin-bottom: 20px;">
+                              <div class="checkbox-item">
+                                <input type="checkbox" id="skills2" checked class="material-checkbox">
+                                <span class="checkbox-icon checked">
+                                    <i class="material-icons">check_box</i>
+                                </span>
+                                <label for="skills" id="skills_label" style="margin: 0; font-weight: 500;">Skills</label>
+                                <input type="text" id="skills2" placeholder="Type your skills"
+                                    pattern="^[^0-9]+$" title="Skills cannot contain numbers"
+                                    style="flex: 1; padding: 8px 12px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px;">
+                            </div>
                             <div class="checkbox-item">
                                 <input type="checkbox" id="offices" class="material-checkbox">
                                 <span class="checkbox-icon">
@@ -572,19 +639,24 @@
                                     <i class="material-icons">check_box</i>
                                 </span>
                                 <label for="team-services" style="margin: 0; font-weight: 500;">Team</label>
-                                <label for="employees-services" style="margin: 0; font-weight: 500; margin-left: 12px;">Share the number of full time employee</label>
-                                <input type="number" id="employees-services" placeholder="e.g. 25" style="width: 100px; padding: 8px 12px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px;">
+                                <label for="employees-services"
+                                    style="margin: 0; font-weight: 500; margin-left: 12px;">Share the number of full
+                                    time employee</label>
+                                <input type="number" id="employees-services" placeholder="e.g. 25"
+                                    style="width: 100px; padding: 8px 12px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px;">
                             </div>
                         </div>
                     </div>
                 </div>
 
-               
+
 
                 <div class="button-group">
                     <button class="btn-secondary" onclick="goToStep(2)">← Back</button>
-                    <button class="btn-secondary btn-icon" onclick="goToStep(3)">Save Draft <i class="material-icons" style="font-size: 18px;">bookmark_border</i></button>
-                    <button class="btn-primary btn-icon" onclick="handleNext(3, 4)">Next <i class="material-icons" style="font-size: 18px;">arrow_forward</i></button>
+                    <button class="btn-secondary btn-icon" onclick="goToStep(3)">Save Draft <i class="material-icons"
+                            style="font-size: 18px;">bookmark_border</i></button>
+                    <button class="btn-primary btn-icon" onclick="handleNext(3, 4)">Next <i class="material-icons"
+                            style="font-size: 18px;">arrow_forward</i></button>
                 </div>
             </div>
 
@@ -596,17 +668,22 @@
                     </div>
                     <div>
                         <h2 class="section-title">Share your problem</h2>
-                        <p class="section-subtitle">An important focus of our network is to come together and help solve each other's problems. Kindly share a problem which is of current relevance to you.</p>
+                        <p class="section-subtitle">An important focus of our network is to come together and help solve
+                            each other's problems. Kindly share a problem which is of current relevance to you.</p>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Is there a problem you would like members of Privé to help you solve ? (Kindly do note that this would get shared within the Privé network for peers to help you)</label>
-                    <textarea id="problemStatement" required style="width: 100%; padding: 12px 14px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; color: #333333; resize: vertical; min-height: 100px;" placeholder="Share your problem"></textarea>
+                    <label>Is there a problem you would like members of Privé to help you solve ? (Kindly do note that
+                        this would get shared within the Privé network for peers to help you)</label>
+                    <textarea id="problemStatement" required
+                        style="width: 100%; padding: 12px 14px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; color: #333333; resize: vertical; min-height: 100px;"
+                        placeholder="Share your problem"></textarea>
                 </div>
 
                 <div style="text-align: center; margin-top: 50px;">
-                    <button class="btn-primary" onclick="handleSubmit()" style="width: auto; padding: 14px 48px; font-size: 16px;">Submit Application</button>
+                    <button class="btn-primary" onclick="handleSubmit()"
+                        style="width: auto; padding: 14px 48px; font-size: 16px;">Submit Application</button>
                 </div>
             </div>
         </div>
@@ -710,7 +787,7 @@
         // Close sidebar when clicking a step on mobile
         if (window.innerWidth <= 768) {
             document.querySelectorAll('.step').forEach(step => {
-                step.addEventListener('click', function() {
+                step.addEventListener('click', function () {
                     document.querySelector('.sidebar').classList.remove('active');
                 });
             });
@@ -720,7 +797,7 @@
         document.querySelectorAll('.material-checkbox').forEach(checkbox => {
             const icon = checkbox.nextElementSibling;
 
-            checkbox.addEventListener('change', function() {
+            checkbox.addEventListener('change', function () {
                 if (this.checked) {
                     icon.classList.add('checked');
                     icon.innerHTML = '<i class="material-icons">check_box</i>';
@@ -730,7 +807,7 @@
                 }
             });
 
-            icon.addEventListener('click', function() {
+            icon.addEventListener('click', function () {
                 checkbox.checked = !checkbox.checked;
                 checkbox.dispatchEvent(new Event('change'));
             });
@@ -1083,4 +1160,5 @@
         })();
     </script>
 </body>
+
 </html>

@@ -841,6 +841,25 @@ select.error {
     background-color: #BA8A3D;
 }
 
+.partnershipCollabDiv {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+}
+
+.partnershipCollabDiv .form-group {
+    flex: 1;
+}
+
+.partnershipCollabDiv input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#skills_label{
+    min-width: 98px;
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
     .form-row.four-column {
