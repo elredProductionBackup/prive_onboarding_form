@@ -1,0 +1,3 @@
+Pincode/Zip key is missing (personal details page)
+collaborationLocation should be only string value
+companyLocation should be only string value

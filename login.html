@@ -14,6 +14,8 @@
     </style>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="auth.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios@1/dist/axios.min.js"></script>
+    <script src="env.js"></script>
 </head>
 <body>
     <div class="auth-page">
@@ -28,12 +30,12 @@
             <form id="loginForm" novalidate>
                 <div class="auth-form-group">
                     <label for="mobile">Mobile number</label>
-                    <input type="tel" id="mobile" class="auth-input" placeholder="Enter mobile number" inputmode="numeric" required>
+                    <input type="tel" id="mobile" name="mobile-nofill" class="auth-input" placeholder="Enter mobile number" inputmode="numeric" required autocomplete="new-password">
                     <p class="auth-error-text" id="mobileError">Please enter a valid 10 digit mobile number.</p>
                 </div>
 
-                <button type="submit" class="auth-btn-primary">
-                    Verify with OTP
+                <button type="submit" class="auth-btn-primary" id="loginSubmitBtn">
+                    <span id="loginSubmitText">Verify with OTP</span>
                     <i class="material-icons" style="font-size: 18px;">arrow_forward</i>
                 </button>
             </form>
@@ -58,7 +60,10 @@
             mobileInput.classList.remove('error');
         });
 
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
+        const loginSubmitBtn = document.getElementById('loginSubmitBtn');
+        const loginSubmitText = document.getElementById('loginSubmitText');
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const mobile = mobileInput.value.trim();
             if (!/^\d{10}$/.test(mobile)) {
@@ -67,8 +72,29 @@
                 showToast('Please enter a valid 10 digit mobile number.');
                 return;
             }
-            sessionStorage.setItem('privePendingMobile', '+91' + mobile);
-            window.location.href = 'otp.html';
+
+            const phoneNumber = '+91' + mobile;
+            loginSubmitBtn.disabled = true;
+            loginSubmitText.textContent = 'Sending OTP...';
+
+            try {
+                const response = await axios.post(window.ENV.API_BASE_URL + '/sendPhoneNumberOTP', {
+                    phoneNumber,
+                    hashId: window.ENV.HASH_ID
+                });
+                const data = response.data;
+                if (!data.success) {
+                    throw new Error(data.message || 'Failed to send OTP.');
+                }
+                setOtpTransaction(data.result);
+                sessionStorage.setItem('privePendingMobile', phoneNumber);
+                sessionStorage.setItem('priveOtpJustSent', 'true');
+                window.location.href = 'otp.html';
+            } catch (err) {
+                showToast(getApiErrorMessage(err, 'Failed to send OTP. Please try again.'));
+                loginSubmitBtn.disabled = false;
+                loginSubmitText.textContent = 'Verify with OTP';
+            }
         });
     </script>
 </body>

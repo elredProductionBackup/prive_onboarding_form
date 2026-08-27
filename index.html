@@ -16,6 +16,8 @@
     </style>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios@1/dist/axios.min.js"></script>
+    <script src="env.js"></script>
     <script src="auth.js"></script>
     <script>requireAuth();</script>
 </head>
@@ -24,6 +26,9 @@
     <div class="container">
         <!-- Sidebar -->
         <div class="sidebar">
+            <button class="sidebar-close-btn" onclick="toggleSidebar()" aria-label="Close menu">
+                <i class="material-icons">close</i>
+            </button>
             <div class="sidebar-header">
                 <h2 class="sidebar-title">Membership Application</h2>
                 <p class="sidebar-subtitle">Help us understand your journey, business, expertise, and aspirations.</p>
@@ -83,12 +88,21 @@
 
         <!-- Main Content -->
         <div class="main-content">
-            <button class="mobile-menu-btn" onclick="toggleSidebar()"
-                style="display: none; position: fixed; top: 20px; left: 20px; z-index: 999; background: none; border: none; cursor: pointer; font-size: 24px;">
-                <i class="material-icons">menu</i>
-            </button>
             <div class="header">
+                <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Open menu">
+                    <i class="material-icons">menu</i>
+                </button>
                 <img src="logo.svg" alt="Privé" class="logo">
+            </div>
+
+            <div class="progress-section mobile-progress-section">
+                <div class="progress-header">
+                    <span id="stepTextMobile">Step 1 of 4</span>
+                    <span id="percentTextMobile">25% Complete</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFillMobile" style="width: 25%;"></div>
+                </div>
             </div>
 
             <!-- STEP 1: PERSONAL INFORMATION -->
@@ -108,45 +122,56 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="firstName">First Name</label>
-                        <input type="text" id="firstName" placeholder="e.g. John" required minlength="2"
-                            pattern="^[A-Za-z .'\-]+$" title="First name must be at least 2 letters">
+                        <input type="text" id="firstName" name="firstName-nofill" placeholder="e.g. John" required minlength="2"
+                            pattern="^[A-Za-z .'\-]+$" title="First name must be at least 2 letters" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false">
                     </div>
                     <div class="form-group">
                         <label for="lastName">Last Name</label>
-                        <input type="text" id="lastName" placeholder="e.g. Smith" required minlength="2"
-                            pattern="^[A-Za-z .'\-]+$" title="Last name must be at least 2 letters">
+                        <input type="text" id="lastName" name="lastName-nofill" placeholder="e.g. Smith" required minlength="2"
+                            pattern="^[A-Za-z .'\-]+$" title="Last name must be at least 2 letters" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="username">Username</label>
-                        <input type="text" id="username" placeholder="Enter username" required minlength="3"
+                        <input type="text" id="username" name="username-nofill" placeholder="Enter username" required minlength="3"
                             maxlength="20" pattern="^[a-zA-Z0-9_]{3,20}$"
-                            title="3-20 characters: letters, numbers, underscore only">
+                            title="3-20 characters: letters, numbers, underscore only" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false">
+                        <p class="username-status" id="usernameStatus">Enter min. 3 characters</p>
                     </div>
                     <div class="form-group" id="emailFieldGroup">
                         <label for="email" id="emailLabel">E-mail</label>
                         <div class="email-action-row" id="emailActionRow">
-                            <input type="email" id="email" placeholder="email@example.com" required
-                                title="Please enter a valid email address">
-                            <button type="button" class="btn-secondary" id="emailActionBtn"
+                            <input type="email" id="email" name="email-nofill" placeholder="email@example.com" required disabled
+                                title="Please enter a valid email address" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false">
+                            <button type="button" class="btn-secondary" id="emailActionBtn" disabled
                                 onclick="sendEmailOtp()">Validate email</button>
                             <span class="email-verified-badge" id="emailVerifiedBadge">
                                 <img src="icons/verified.svg" alt="" width="18" height="18"> Email verified
                             </span>
                         </div>
+                        <p class="error-text" id="emailError" style="display: none;"></p>
+                        <p class="error-text" id="emailGatingHint" style="color: #999999;">Please choose an available username first.</p>
 
                         <div class="email-otp-block" id="emailOtpBlock" style="display: none;">
-                            <label class="email-otp-label" for="emailOtpInput">Enter OTP sent to <span
-                                    id="emailOtpMasked"></span></label>
+                            <label class="email-otp-label" for="emailOtpInput">
+                                Enter OTP sent to <span id="emailOtpMasked"></span>
+                                <i class="material-icons email-edit-icon" onclick="editEmail()" title="Edit email address" role="button" tabindex="0">edit</i>
+                            </label>
                             <div class="email-otp-row">
-                                <input type="text" id="emailOtpInput" placeholder="Enter 6 digit OTP" maxlength="6"
-                                    inputmode="numeric" pattern="^\d{6}$" title="Please enter the 6 digit OTP">
+                                <input type="text" id="emailOtpInput" name="emailOtpInput-nofill" placeholder="Enter 6 digit OTP" maxlength="6"
+                                    inputmode="numeric" pattern="^\d{6}$" title="Please enter the 6 digit OTP" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false">
                                 <button type="button" class="btn-secondary" id="emailVerifyBtn"
                                     onclick="verifyEmailOtp()" disabled>Verify OTP</button>
                             </div>
-                            <p class="error-text" id="emailOtpError" style="display: none;"></p>
+                            <div class="email-otp-footer">
+                                <p class="error-text" id="emailOtpError" style="display: none;"></p>
+                                <div class="otp-timer">
+                                    <span id="emailOtpTimerText">Resend OTP in: 01:00</span>
+                                    <button type="button" class="otp-resend" id="emailResendBtn" onclick="sendEmailOtp()" style="display:none;">Resend OTP</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -154,15 +179,15 @@
                 <div class="form-row three-column">
                     <div class="form-group">
                         <label for="linkedin">Linkedin profile URL</label>
-                        <input type="text" id="linkedin" placeholder="https://linkedin.com/in/username" required
+                        <input type="text" id="linkedin" name="linkedin-nofill" placeholder="https://linkedin.com/in/username"
                             pattern="^https?:\/\/([a-z]{2,3}\.)?linkedin\.com\/.+$"
-                            title="Please enter a valid LinkedIn profile URL">
+                            title="Please enter a valid LinkedIn profile URL" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false">
                     </div>
                     <div class="form-group">
                         <label for="dob">Date of Birth</label>
-                        <input type="text" id="dob" placeholder="DD/MM/YYYY" required inputmode="numeric"
+                        <input type="text" id="dob" name="dob-nofill" placeholder="DD/MM/YYYY" required inputmode="numeric"
                             pattern="^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/\d{4}$"
-                            title="Please enter date in DD/MM/YYYY format">
+                            title="Please enter date in DD/MM/YYYY format" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false">
                     </div>
                     <div class="form-group">
                         <label for="gender">Gender</label>
@@ -176,211 +201,22 @@
                     </div>
                 </div>
 
-                <div class="form-row four-column">
-                    <div class="form-group">
-                        <label for="city">City</label>
-                        <input type="text" id="city" list="cityOptions" placeholder="Select city" required minlength="2"
-                            pattern="^[^0-9]+$" title="City cannot contain numbers">
-                        <datalist id="cityOptions">
-                            <option>Mumbai</option>
-                            <option>Delhi</option>
-                            <option>Bengaluru</option>
-                            <option>Hyderabad</option>
-                            <option>Ahmedabad</option>
-                            <option>Chennai</option>
-                            <option>Kolkata</option>
-                            <option>Surat</option>
-                            <option>Pune</option>
-                            <option>Jaipur</option>
-                            <option>Lucknow</option>
-                            <option>Kanpur</option>
-                            <option>Nagpur</option>
-                            <option>Indore</option>
-                            <option>Thane</option>
-                            <option>Bhopal</option>
-                            <option>Visakhapatnam</option>
-                            <option>Vadodara</option>
-                            <option>Ghaziabad</option>
-                            <option>Chandigarh</option>
-                            <option>Coimbatore</option>
-                            <option>Kochi</option>
-                            <option>Gurugram</option>
-                            <option>Noida</option>
-                        </datalist>
-                    </div>
-                    <div class="form-group">
-                        <label for="state">State</label>
-                        <select id="state" required>
-                            <option value="" selected disabled>Select state</option>
-                            <option>Andaman and Nicobar Islands</option>
-                            <option>Andhra Pradesh</option>
-                            <option>Arunachal Pradesh</option>
-                            <option>Assam</option>
-                            <option>Bihar</option>
-                            <option>Chandigarh</option>
-                            <option>Chhattisgarh</option>
-                            <option>Dadra and Nagar Haveli and Daman and Diu</option>
-                            <option>Delhi</option>
-                            <option>Goa</option>
-                            <option>Gujarat</option>
-                            <option>Haryana</option>
-                            <option>Himachal Pradesh</option>
-                            <option>Jammu and Kashmir</option>
-                            <option>Jharkhand</option>
-                            <option>Karnataka</option>
-                            <option>Kerala</option>
-                            <option>Ladakh</option>
-                            <option>Lakshadweep</option>
-                            <option>Madhya Pradesh</option>
-                            <option>Maharashtra</option>
-                            <option>Manipur</option>
-                            <option>Meghalaya</option>
-                            <option>Mizoram</option>
-                            <option>Nagaland</option>
-                            <option>Odisha</option>
-                            <option>Puducherry</option>
-                            <option>Punjab</option>
-                            <option>Rajasthan</option>
-                            <option>Sikkim</option>
-                            <option>Tamil Nadu</option>
-                            <option>Telangana</option>
-                            <option>Tripura</option>
-                            <option>Uttar Pradesh</option>
-                            <option>Uttarakhand</option>
-                            <option>West Bengal</option>
-                            <option>Other</option>
-                        </select>
+                <div class="form-row">
+                    <div class="form-group location-search-group">
+                        <label for="locationSearch">Location</label>
+                        <div class="location-search-input-wrap">
+                            <input type="text" id="locationSearch" name="locationSearch-nofill" placeholder="Start typing a city, e.g. Mumbai" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" required>
+                            <span class="location-search-spinner" id="locationSpinner"></span>
+                        </div>
+                        <div class="location-suggestions" id="locationSuggestions"></div>
+                        <input type="hidden" id="city">
+                        <input type="hidden" id="state">
+                        <input type="hidden" id="country">
                     </div>
                     <div class="form-group">
                         <label for="pin">PIN / ZIP Code</label>
-                        <input type="text" id="pin" placeholder="Enter PIN / ZIP Code" required inputmode="numeric"
-                            pattern="^\d{4,10}$" title="Please enter a valid numeric PIN / ZIP code">
-                    </div>
-                    <div class="form-group">
-                        <label for="country">Country</label>
-                        <select id="country" required>
-                            <option value="" selected disabled>Select country</option>
-                            <option selected>India</option>
-                            <option>Afghanistan</option>
-                            <option>Albania</option>
-                            <option>Algeria</option>
-                            <option>Argentina</option>
-                            <option>Armenia</option>
-                            <option>Australia</option>
-                            <option>Austria</option>
-                            <option>Azerbaijan</option>
-                            <option>Bahrain</option>
-                            <option>Bangladesh</option>
-                            <option>Belarus</option>
-                            <option>Belgium</option>
-                            <option>Bhutan</option>
-                            <option>Bolivia</option>
-                            <option>Brazil</option>
-                            <option>Brunei</option>
-                            <option>Bulgaria</option>
-                            <option>Cambodia</option>
-                            <option>Cameroon</option>
-                            <option>Canada</option>
-                            <option>Chile</option>
-                            <option>China</option>
-                            <option>Colombia</option>
-                            <option>Croatia</option>
-                            <option>Cuba</option>
-                            <option>Cyprus</option>
-                            <option>Czechia</option>
-                            <option>Denmark</option>
-                            <option>Ecuador</option>
-                            <option>Egypt</option>
-                            <option>Estonia</option>
-                            <option>Ethiopia</option>
-                            <option>Fiji</option>
-                            <option>Finland</option>
-                            <option>France</option>
-                            <option>Georgia</option>
-                            <option>Germany</option>
-                            <option>Ghana</option>
-                            <option>Greece</option>
-                            <option>Hong Kong</option>
-                            <option>Hungary</option>
-                            <option>Iceland</option>
-                            <option>Indonesia</option>
-                            <option>Iran</option>
-                            <option>Iraq</option>
-                            <option>Ireland</option>
-                            <option>Israel</option>
-                            <option>Italy</option>
-                            <option>Japan</option>
-                            <option>Jordan</option>
-                            <option>Kazakhstan</option>
-                            <option>Kenya</option>
-                            <option>Kuwait</option>
-                            <option>Kyrgyzstan</option>
-                            <option>Laos</option>
-                            <option>Latvia</option>
-                            <option>Lebanon</option>
-                            <option>Lithuania</option>
-                            <option>Luxembourg</option>
-                            <option>Malaysia</option>
-                            <option>Maldives</option>
-                            <option>Malta</option>
-                            <option>Mauritius</option>
-                            <option>Mexico</option>
-                            <option>Moldova</option>
-                            <option>Monaco</option>
-                            <option>Mongolia</option>
-                            <option>Morocco</option>
-                            <option>Myanmar</option>
-                            <option>Nepal</option>
-                            <option>Netherlands</option>
-                            <option>New Zealand</option>
-                            <option>Nigeria</option>
-                            <option>North Korea</option>
-                            <option>Norway</option>
-                            <option>Oman</option>
-                            <option>Pakistan</option>
-                            <option>Palestine</option>
-                            <option>Panama</option>
-                            <option>Peru</option>
-                            <option>Philippines</option>
-                            <option>Poland</option>
-                            <option>Portugal</option>
-                            <option>Qatar</option>
-                            <option>Romania</option>
-                            <option>Russia</option>
-                            <option>Saudi Arabia</option>
-                            <option>Serbia</option>
-                            <option>Singapore</option>
-                            <option>Slovakia</option>
-                            <option>Slovenia</option>
-                            <option>South Africa</option>
-                            <option>South Korea</option>
-                            <option>Spain</option>
-                            <option>Sri Lanka</option>
-                            <option>Sudan</option>
-                            <option>Sweden</option>
-                            <option>Switzerland</option>
-                            <option>Syria</option>
-                            <option>Taiwan</option>
-                            <option>Tajikistan</option>
-                            <option>Tanzania</option>
-                            <option>Thailand</option>
-                            <option>Tunisia</option>
-                            <option>Turkey</option>
-                            <option>Turkmenistan</option>
-                            <option>Uganda</option>
-                            <option>Ukraine</option>
-                            <option>United Arab Emirates</option>
-                            <option>United Kingdom</option>
-                            <option>United States</option>
-                            <option>Uruguay</option>
-                            <option>Uzbekistan</option>
-                            <option>Venezuela</option>
-                            <option>Vietnam</option>
-                            <option>Yemen</option>
-                            <option>Zambia</option>
-                            <option>Zimbabwe</option>
-                            <option>Other</option>
-                        </select>
+                        <input type="text" id="pin" name="pin-nofill" placeholder="Enter PIN / ZIP Code" inputmode="numeric"
+                            pattern="^\d{4,10}$" title="Please enter a valid numeric PIN / ZIP code" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false">
                     </div>
                 </div>
 
@@ -426,9 +262,7 @@
                 </div>
 
                 <div class="button-group">
-                    <button class="btn-secondary btn-icon" onclick="goToStep(1)">Save Draft <i class="material-icons"
-                            style="font-size: 18px;">bookmark_border</i></button>
-                    <button class="btn-primary btn-icon" onclick="handleNext(1, 2)">Next <i class="material-icons"
+                    <button class="btn-primary btn-icon" onclick="handleSaveAndContinue(1, 2, this)">Save &amp; Continue <i class="material-icons"
                             style="font-size: 18px;">arrow_forward</i></button>
                 </div>
             </div>
@@ -451,25 +285,35 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="companyName">Company Name</label>
-                        <input type="text" id="companyName" placeholder="Company Name" required>
+                        <input type="text" id="companyName" name="companyName-nofill" placeholder="Company Name" required autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group location-search-group">
                         <label for="designation">Designation</label>
-                        <input type="text" id="designation" placeholder="Your designation" required>
+                        <div class="location-search-input-wrap">
+                            <input type="text" id="designation" name="designation-nofill" placeholder="Your designation" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" required>
+                            <span class="location-search-spinner" id="designationSpinner"></span>
+                        </div>
+                        <div class="location-suggestions" id="designationSuggestions"></div>
                     </div>
                 </div>
 
                 <div class="form-row">
-                    <div class="form-group">
-                        <label for="companyLocation">Company location</label>
-                        <input type="text" id="companyLocation" placeholder="Enter company city" required minlength="2"
-                            pattern="^[^0-9]+$" title="City cannot contain numbers">
+                    <div class="form-group location-search-group">
+                        <label for="companyLocationSearch">Company Location</label>
+                        <div class="location-search-input-wrap">
+                            <input type="text" id="companyLocationSearch" name="companyLocationSearch-nofill" placeholder="Start typing a city, e.g. Mumbai" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" required>
+                            <span class="location-search-spinner" id="companyLocationSpinner"></span>
+                        </div>
+                        <div class="location-suggestions" id="companyLocationSuggestions"></div>
+                        <input type="hidden" id="companyLocation">
+                        <input type="hidden" id="companyState">
+                        <input type="hidden" id="companyCountry">
                     </div>
                     <div class="form-group">
                         <label for="websiteUrl">Company's website URL</label>
-                        <input type="text" id="websiteUrl" placeholder="Enter website URL" required
+                        <input type="text" id="websiteUrl" name="websiteUrl-nofill" placeholder="Enter website URL"
                             pattern="^(https?:\/\/)?([0-9a-zA-Z\-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$"
-                            title="Please enter a valid website URL, e.g. https://example.com">
+                            title="Please enter a valid website URL, e.g. https://example.com" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false">
                     </div>
                 </div>
 
@@ -493,14 +337,13 @@
                     </div>
                     <div class="form-group">
                         <label for="gstNumber">GST Number</label>
-                        <input type="text" id="gstNumber" placeholder="Enter GST Number" required>
+                        <input type="text" id="gstNumber" name="gstNumber-nofill" placeholder="Enter GST Number" required autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false">
                     </div>
                 </div>
 
                 <div class="button-group">
                     <button class="btn-secondary" onclick="goToStep(1)">← Back</button>
-                    <button class="btn-secondary" onclick="goToStep(2)">Save Draft</button>
-                    <button class="btn-primary" onclick="handleNext(2, 3)">Next →</button>
+                    <button class="btn-primary" onclick="handleSaveAndContinue(2, 3, this)">Save &amp; Continue</button>
                 </div>
             </div>
 
@@ -521,23 +364,33 @@
 
 
                 <div class="partnershipCollabDiv">
-                    <div class="form-group">
+                    <div class="form-group location-search-group">
                         <label for="channelPartnerIndustry">I am looking for channel partner from these
                             industries</label>
-                        <input type="text" id="channelPartnerIndustry" placeholder="Add industries" pattern="^[^0-9]+$"
-                            title="Location cannot contain numbers">
+                        <div class="location-search-input-wrap">
+                            <input type="text" id="channelPartnerIndustry" name="channelPartnerIndustry-nofill" placeholder="Add industry" pattern="^[^0-9]+$"
+                                title="Location cannot contain numbers" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false">
+                            <span class="location-search-spinner" id="channelPartnerIndustrySpinner"></span>
+                        </div>
+                        <div class="location-suggestions" id="channelPartnerIndustrySuggestions"></div>
                     </div>
-                    <div class="form-group">
-                        <label for="channelPartnerLocation">Location where you are open for Distributors / Channel
+                    <div class="form-group location-search-group">
+                        <label for="channelPartnerLocationSearch">Location where you are open for Distributors / Channel
                             Partners</label>
-                        <input type="text" id="channelPartnerLocation" placeholder="Enter location" pattern="^[^0-9]+$"
-                            title="Location cannot contain numbers">
+                        <div class="location-search-input-wrap">
+                            <input type="text" id="channelPartnerLocationSearch" name="channelPartnerLocationSearch-nofill" placeholder="Start typing a city, e.g. Mumbai" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false">
+                            <span class="location-search-spinner" id="channelPartnerLocationSpinner"></span>
+                        </div>
+                        <div class="location-suggestions" id="channelPartnerLocationSuggestions"></div>
+                        <input type="hidden" id="channelPartnerLocation">
+                        <input type="hidden" id="channelPartnerLocationState">
+                        <input type="hidden" id="channelPartnerLocationCountry">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label>Short note on what kind partnerships you open for</label>
-                    <textarea id="channelPartnerNote"
+                    <textarea id="channelPartnerNote" autocomplete="off"
                         style="width: 100%; padding: 12px 14px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; color: #333333; resize: vertical; min-height: 60px;"
                         placeholder="Short note"></textarea>
                 </div>
@@ -564,8 +417,8 @@
                                     <i class="material-icons">check_box</i>
                                 </span>
                                 <label for="skills" id="skills_label" style="margin: 0; font-weight: 500;">Skills</label>
-                                <input type="text" id="skills" placeholder="Type your skills"
-                                    pattern="^[^0-9]+$" title="Skills cannot contain numbers"
+                                <input type="text" id="skills" name="skills-nofill" placeholder="Type your skills"
+                                    pattern="^[^0-9]+$" title="Skills cannot contain numbers" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false"
                                     style="flex: 1; padding: 8px 12px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px;">
                             </div>
                             <div class="checkbox-item">
@@ -574,9 +427,17 @@
                                     <i class="material-icons">check_box</i>
                                 </span>
                                 <label for="manufacturing" style="margin: 0; font-weight: 500;">Manufacturing</label>
-                                <input type="text" id="manufacturingLocation" placeholder="Enter Location"
-                                    pattern="^[^0-9]+$" title="Location cannot contain numbers"
-                                    style="flex: 1; padding: 8px 12px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px;">
+                                <div class="location-search-group" style="flex: 1;">
+                                    <div class="location-search-input-wrap">
+                                        <input type="text" id="manufacturingLocationSearch" name="manufacturingLocationSearch-nofill" placeholder="Start typing a city, e.g. Mumbai" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false"
+                                            style="width: 100%; padding: 8px 12px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px;">
+                                        <span class="location-search-spinner" id="manufacturingLocationSpinner"></span>
+                                    </div>
+                                    <div class="location-suggestions" id="manufacturingLocationSuggestions"></div>
+                                    <input type="hidden" id="manufacturingLocation">
+                                    <input type="hidden" id="manufacturingLocationState">
+                                    <input type="hidden" id="manufacturingLocationCountry">
+                                </div>
                             </div>
                             <div class="checkbox-item">
                                 <input type="checkbox" id="warehouse" class="material-checkbox">
@@ -607,7 +468,7 @@
                                 <label for="team" style="margin: 0; font-weight: 500;">Team</label>
                                 <label for="employees" style="margin: 0; font-weight: 500; margin-left: 60px;">Share the
                                     number of full time employee</label>
-                                <input type="number" id="employees" placeholder="e.g. 25"
+                                <input type="number" id="employees" name="employees-nofill" placeholder="e.g. 25" autocomplete="new-password"
                                     style="width: 100px; padding: 8px 12px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px;">
                             </div>
                         </div>
@@ -622,8 +483,8 @@
                                     <i class="material-icons">check_box</i>
                                 </span>
                                 <label for="skills" id="skills_label" style="margin: 0; font-weight: 500;">Skills</label>
-                                <input type="text" id="skills2" placeholder="Type your skills"
-                                    pattern="^[^0-9]+$" title="Skills cannot contain numbers"
+                                <input type="text" id="skills2" name="skills2-nofill" placeholder="Type your skills"
+                                    pattern="^[^0-9]+$" title="Skills cannot contain numbers" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false"
                                     style="flex: 1; padding: 8px 12px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px;">
                             </div>
                             <div class="checkbox-item">
@@ -642,7 +503,7 @@
                                 <label for="employees-services"
                                     style="margin: 0; font-weight: 500; margin-left: 12px;">Share the number of full
                                     time employee</label>
-                                <input type="number" id="employees-services" placeholder="e.g. 25"
+                                <input type="number" id="employees-services" name="employees-services-nofill" placeholder="e.g. 25" autocomplete="new-password"
                                     style="width: 100px; padding: 8px 12px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px;">
                             </div>
                         </div>
@@ -653,9 +514,7 @@
 
                 <div class="button-group">
                     <button class="btn-secondary" onclick="goToStep(2)">← Back</button>
-                    <button class="btn-secondary btn-icon" onclick="goToStep(3)">Save Draft <i class="material-icons"
-                            style="font-size: 18px;">bookmark_border</i></button>
-                    <button class="btn-primary btn-icon" onclick="handleNext(3, 4)">Next <i class="material-icons"
+                    <button class="btn-primary btn-icon" onclick="handleSaveAndContinue(3, 4, this)">Save &amp; Continue <i class="material-icons"
                             style="font-size: 18px;">arrow_forward</i></button>
                 </div>
             </div>
@@ -676,20 +535,652 @@
                 <div class="form-group">
                     <label>Is there a problem you would like members of Privé to help you solve ? (Kindly do note that
                         this would get shared within the Privé network for peers to help you)</label>
-                    <textarea id="problemStatement" required
+                    <textarea id="problemStatement" required autocomplete="off"
                         style="width: 100%; padding: 12px 14px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; color: #333333; resize: vertical; min-height: 100px;"
                         placeholder="Share your problem"></textarea>
                 </div>
 
-                <div style="text-align: center; margin-top: 50px;">
-                    <button class="btn-primary" onclick="handleSubmit()"
+                <div style="text-align: center; margin-top: 50px; display: flex; justify-content: center; gap: 16px;">
+                    <button class="btn-secondary" onclick="goToStep(3)">← Back</button>
+                    <button class="btn-secondary" id="step4SaveDraftBtn" onclick="handleStep4SaveDraft(this)">Save Draft</button>
+                    <button class="btn-primary" id="submitApplicationBtn" onclick="handleSubmitApplication()" disabled
                         style="width: auto; padding: 14px 48px; font-size: 16px;">Submit Application</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <div class="modal-overlay" id="alreadySubmittedModal" style="display:none;">
+        <div class="modal-card">
+            <div class="modal-icon-wrap">
+                <i class="material-icons">lock</i>
+            </div>
+            <h2 class="modal-title">Already Submitted</h2>
+            <p class="modal-subtitle">This form has already been completed. The submitted details cannot be changed.</p>
+            <button class="btn-primary modal-close-btn" onclick="closeAlreadySubmittedModal()">Close</button>
+        </div>
+    </div>
+
     <script>
+        // ---------- Kill browser autofill/history suggestions on every field ----------
+        // autocomplete="new-password" alone isn't 100% reliable in Chrome — it can still
+        // resurface values typed into a field on a PRIOR page load, keyed off a stable
+        // name/id. Randomizing the name attribute on every load removes that stable key,
+        // so there's never a match for the browser to suggest.
+        document.querySelectorAll('input[name$="-nofill"]').forEach(el => {
+            el.setAttribute('name', el.id + '-' + Math.random().toString(36).slice(2, 10));
+        });
+
+        // ---------- Location search (Photon by Komoot — free, no API key) ----------
+        // Photon is built for incremental/prefix search, unlike Nominatim's plain /search
+        // which only matches whole place names. Results are biased to India's bounding box
+        // since this form is India-focused (GST field, +91 default) — without it, short
+        // queries mostly surface unrelated same-named villages abroad.
+        function setupLocationSearch(config) {
+            const searchInput = document.getElementById(config.inputId);
+            const suggestionsBox = document.getElementById(config.suggestionsId);
+            const spinner = document.getElementById(config.spinnerId);
+            let debounceTimer = null;
+            let abortController = null;
+            let latestRequestId = 0;
+
+            function hideSuggestions() {
+                suggestionsBox.style.display = 'none';
+                suggestionsBox.innerHTML = '';
+            }
+
+            function formatSuggestion(props) {
+                const parts = [props.name, props.city, props.state, props.country].filter(Boolean);
+                return parts.filter((v, i) => parts.indexOf(v) === i).join(', ');
+            }
+
+            function selectLocation(props) {
+                searchInput.value = formatSuggestion(props);
+                hideSuggestions();
+                config.onSelect({
+                    city: props.city || props.name || '',
+                    // Photon omits "state" for some places (e.g. city-states, small towns) —
+                    // fall back through other admin-level fields so we never send an empty string.
+                    state: props.state || props.county || props.state_district || props.region || props.city || props.name || '',
+                    country: props.country || ''
+                });
+            }
+
+            function renderSuggestions(features) {
+                suggestionsBox.innerHTML = '';
+
+                const seen = new Set();
+                const deduped = [];
+                features.forEach((feature) => {
+                    const props = feature.properties || {};
+                    const label = formatSuggestion(props);
+                    if (seen.has(label)) return;
+                    seen.add(label);
+                    deduped.push(props);
+                });
+
+                if (!deduped.length) {
+                    hideSuggestions();
+                    return;
+                }
+                deduped.forEach((props) => {
+                    const item = document.createElement('div');
+                    item.className = 'location-suggestion-item';
+                    item.textContent = formatSuggestion(props);
+                    item.addEventListener('click', () => selectLocation(props));
+                    suggestionsBox.appendChild(item);
+                });
+                suggestionsBox.style.display = 'block';
+            }
+
+            async function searchLocation(query) {
+                // Cancel any still-in-flight request so a slow, now-outdated response can't
+                // land after (and overwrite) the result of what the user typed next.
+                if (abortController) {
+                    abortController.abort();
+                }
+                abortController = new AbortController();
+                const requestId = ++latestRequestId;
+                spinner.classList.add('active');
+
+                try {
+                    const response = await axios.get('https://photon.komoot.io/api/', {
+                        params: { q: query, limit: 5, lang: 'en', bbox: '68,6,97.5,37.5' },
+                        signal: abortController.signal,
+                        timeout: 6000
+                    });
+                    if (requestId !== latestRequestId) return; // superseded by a newer keystroke
+                    renderSuggestions((response.data && response.data.features) || []);
+                } catch (err) {
+                    if (requestId === latestRequestId && !axios.isCancel(err)) {
+                        hideSuggestions();
+                    }
+                } finally {
+                    if (requestId === latestRequestId) {
+                        spinner.classList.remove('active');
+                    }
+                }
+            }
+
+            searchInput.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                const query = searchInput.value.trim();
+                if (query.length < 3) {
+                    if (abortController) {
+                        abortController.abort();
+                    }
+                    latestRequestId++;
+                    spinner.classList.remove('active');
+                    hideSuggestions();
+                    return;
+                }
+                debounceTimer = setTimeout(() => searchLocation(query), 250);
+            });
+
+            document.addEventListener('click', (e) => {
+                if (e.target !== searchInput && !suggestionsBox.contains(e.target)) {
+                    hideSuggestions();
+                }
+            });
+        }
+
+        setupLocationSearch({
+            inputId: 'locationSearch',
+            suggestionsId: 'locationSuggestions',
+            spinnerId: 'locationSpinner',
+            onSelect: (loc) => {
+                document.getElementById('city').value = loc.city;
+                document.getElementById('state').value = loc.state;
+                document.getElementById('country').value = loc.country;
+            }
+        });
+
+        setupLocationSearch({
+            inputId: 'companyLocationSearch',
+            suggestionsId: 'companyLocationSuggestions',
+            spinnerId: 'companyLocationSpinner',
+            onSelect: (loc) => {
+                document.getElementById('companyLocation').value = loc.city;
+                document.getElementById('companyState').value = loc.state;
+                document.getElementById('companyCountry').value = loc.country;
+            }
+        });
+
+        setupLocationSearch({
+            inputId: 'channelPartnerLocationSearch',
+            suggestionsId: 'channelPartnerLocationSuggestions',
+            spinnerId: 'channelPartnerLocationSpinner',
+            onSelect: (loc) => {
+                document.getElementById('channelPartnerLocation').value = loc.city;
+                document.getElementById('channelPartnerLocationState').value = loc.state;
+                document.getElementById('channelPartnerLocationCountry').value = loc.country;
+            }
+        });
+
+        setupLocationSearch({
+            inputId: 'manufacturingLocationSearch',
+            suggestionsId: 'manufacturingLocationSuggestions',
+            spinnerId: 'manufacturingLocationSpinner',
+            onSelect: (loc) => {
+                document.getElementById('manufacturingLocation').value = loc.city;
+                document.getElementById('manufacturingLocationState').value = loc.state;
+                document.getElementById('manufacturingLocationCountry').value = loc.country;
+            }
+        });
+
+        // ---------- Designation (job title) search-as-you-type ----------
+        // With no searchKey, getTitles returns only curated/verified titles (isValid:true);
+        // with a searchKey it returns all matches (incl. unverified/user-added) so new
+        // entries a user just typed elsewhere become discoverable immediately.
+        const TITLES_API_BASE_URL = window.ENV.API_BASE_URL;
+
+        // Short acronyms (<=3 chars, e.g. "IT", "CTO", "CEO") display fully capitalized;
+        // longer, multi-word titles display in Title Case (e.g. "Audit Manager"). Shared by
+        // the suggestions dropdown, manual typing (on blur), and prefill from saved data.
+        function formatTitleLabel(label) {
+            const trimmed = (label || '').trim();
+            if (!trimmed) return trimmed;
+            if (trimmed.length <= 3) return trimmed.toUpperCase();
+            return trimmed.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+        }
+
+        function setupTitleSearch(config) {
+            const searchInput = document.getElementById(config.inputId);
+            const suggestionsBox = document.getElementById(config.suggestionsId);
+            const spinner = document.getElementById(config.spinnerId);
+            let debounceTimer = null;
+            let abortController = null;
+            let latestRequestId = 0;
+
+            function hideSuggestions() {
+                suggestionsBox.style.display = 'none';
+                suggestionsBox.innerHTML = '';
+            }
+
+            function extractLabel(item) {
+                if (typeof item === 'string') return item;
+                return item.title || item.name || item.designation || item.value || '';
+            }
+
+            function renderSuggestions(items) {
+                suggestionsBox.innerHTML = '';
+
+                const seen = new Set();
+                const labels = [];
+                items.forEach((item) => {
+                    const raw = extractLabel(item).trim();
+                    if (!raw) return;
+                    const label = formatTitleLabel(raw);
+                    if (seen.has(label)) return;
+                    seen.add(label);
+                    labels.push(label);
+                });
+
+                if (!labels.length) {
+                    hideSuggestions();
+                    return;
+                }
+                labels.forEach((label) => {
+                    const el = document.createElement('div');
+                    el.className = 'location-suggestion-item';
+                    el.textContent = label;
+                    el.addEventListener('click', () => {
+                        searchInput.value = label;
+                        hideSuggestions();
+                    });
+                    suggestionsBox.appendChild(el);
+                });
+                suggestionsBox.style.display = 'block';
+            }
+
+            async function searchTitles(query) {
+                if (abortController) {
+                    abortController.abort();
+                }
+                abortController = new AbortController();
+                const requestId = ++latestRequestId;
+                spinner.classList.add('active');
+
+                try {
+                    const response = await axios.get(TITLES_API_BASE_URL + '/getTitles', {
+                        params: { start: 0, offset: 20, searchKey: query },
+                        signal: abortController.signal,
+                        timeout: 6000
+                    });
+                    if (requestId !== latestRequestId) return;
+                    const data = response.data || {};
+                    const list = data.result || data.data || data.titles || (Array.isArray(data) ? data : []);
+                    renderSuggestions(Array.isArray(list) ? list : []);
+                } catch (err) {
+                    if (requestId === latestRequestId && !axios.isCancel(err)) {
+                        hideSuggestions();
+                    }
+                } finally {
+                    if (requestId === latestRequestId) {
+                        spinner.classList.remove('active');
+                    }
+                }
+            }
+
+            searchInput.addEventListener('focus', () => {
+                searchTitles(searchInput.value.trim());
+            });
+
+            searchInput.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => searchTitles(searchInput.value.trim()), 250);
+            });
+
+            document.addEventListener('click', (e) => {
+                if (e.target !== searchInput && !suggestionsBox.contains(e.target)) {
+                    hideSuggestions();
+                }
+            });
+
+            // Also format text the user typed manually without picking a suggestion.
+            searchInput.addEventListener('blur', () => {
+                searchInput.value = formatTitleLabel(searchInput.value);
+            });
+        }
+
+        setupTitleSearch({
+            inputId: 'designation',
+            suggestionsId: 'designationSuggestions',
+            spinnerId: 'designationSpinner'
+        });
+
+        // ---------- Channel partner industry search-as-you-type (single value) ----------
+        // getGamificationIndustries needs no auth and only accepts start/offset/searchKey —
+        // any other query param throws — and start is 1-indexed (unlike getTitles).
+        function setupIndustrySearch(config) {
+            const searchInput = document.getElementById(config.inputId);
+            const suggestionsBox = document.getElementById(config.suggestionsId);
+            const spinner = document.getElementById(config.spinnerId);
+            let debounceTimer = null;
+            let abortController = null;
+            let latestRequestId = 0;
+
+            function hideSuggestions() {
+                suggestionsBox.style.display = 'none';
+                suggestionsBox.innerHTML = '';
+            }
+
+            function extractLabel(item) {
+                if (typeof item === 'string') return item;
+                return item.industryName || item.name || item.industry || item.title || item.value || '';
+            }
+
+            function selectIndustry(label) {
+                searchInput.value = label;
+                hideSuggestions();
+            }
+
+            function renderSuggestions(items) {
+                suggestionsBox.innerHTML = '';
+
+                const seen = new Set();
+                const labels = [];
+                items.forEach((item) => {
+                    const raw = extractLabel(item).trim();
+                    if (!raw) return;
+                    const label = formatTitleLabel(raw);
+                    if (seen.has(label)) return;
+                    seen.add(label);
+                    labels.push(label);
+                });
+
+                if (!labels.length) {
+                    hideSuggestions();
+                    return;
+                }
+                labels.forEach((label) => {
+                    const el = document.createElement('div');
+                    el.className = 'location-suggestion-item';
+                    el.textContent = label;
+                    el.addEventListener('click', () => selectIndustry(label));
+                    suggestionsBox.appendChild(el);
+                });
+                suggestionsBox.style.display = 'block';
+            }
+
+            async function searchIndustries(query) {
+                if (abortController) {
+                    abortController.abort();
+                }
+                abortController = new AbortController();
+                const requestId = ++latestRequestId;
+                spinner.classList.add('active');
+
+                try {
+                    const response = await axios.get(window.ENV.API_BASE_URL + '/getGamificationIndustries', {
+                        params: { start: 1, offset: 10, searchKey: query },
+                        signal: abortController.signal,
+                        timeout: 6000
+                    });
+                    if (requestId !== latestRequestId) return;
+                    const data = response.data || {};
+                    const list = data.result || data.data || data.industries || (Array.isArray(data) ? data : []);
+                    renderSuggestions(Array.isArray(list) ? list : []);
+                } catch (err) {
+                    if (requestId === latestRequestId && !axios.isCancel(err)) {
+                        hideSuggestions();
+                    }
+                } finally {
+                    if (requestId === latestRequestId) {
+                        spinner.classList.remove('active');
+                    }
+                }
+            }
+
+            searchInput.addEventListener('focus', () => {
+                searchIndustries(searchInput.value.trim());
+            });
+
+            searchInput.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => searchIndustries(searchInput.value.trim()), 250);
+            });
+
+            document.addEventListener('click', (e) => {
+                if (e.target !== searchInput && !suggestionsBox.contains(e.target)) {
+                    hideSuggestions();
+                }
+            });
+
+            // Also format text the user typed manually without picking a suggestion.
+            searchInput.addEventListener('blur', () => {
+                searchInput.value = formatTitleLabel(searchInput.value);
+            });
+        }
+
+        setupIndustrySearch({
+            inputId: 'channelPartnerIndustry',
+            suggestionsId: 'channelPartnerIndustrySuggestions',
+            spinnerId: 'channelPartnerIndustrySpinner'
+        });
+
+        // ---------- Load saved user details (username, email) on page load ----------
+        function prefillInput(id, value) {
+            const el = document.getElementById(id);
+            if (el && value !== undefined && value !== null && value !== '') {
+                el.value = value;
+            }
+        }
+
+        function prefillInputBySelector(selector, value) {
+            const el = document.querySelector(selector);
+            if (el && value !== undefined && value !== null && value !== '') {
+                el.value = value;
+            }
+        }
+
+        function prefillSelectByValue(id, value) {
+            const el = document.getElementById(id);
+            if (!el || !value) return;
+            const match = Array.from(el.options).find((o) => o.value.toLowerCase() === String(value).toLowerCase());
+            if (match) el.value = match.value;
+        }
+
+        function prefillToggleGroup(groupSelector, csvValue) {
+            if (!csvValue) return;
+            const wanted = String(csvValue).split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
+            document.querySelectorAll(groupSelector + ' .btn-toggle').forEach((btn) => {
+                if (wanted.includes(btn.textContent.trim().toLowerCase())) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        function prefillCheckbox(selector, shouldCheck) {
+            const el = document.querySelector(selector);
+            if (!el) return;
+            el.checked = !!shouldCheck;
+            el.dispatchEvent(new Event('change'));
+        }
+
+        (async function loadUserDetails() {
+            try {
+                const response = await axios.get(window.ENV.API_BASE_URL + '/getUserDetails');
+                const data = response.data;
+                const user = (data.result && data.result[0]) || data.result || data;
+                const email = data.email || user.email;
+                const userName = user.userName || data.userName;
+
+                // ---- Personal information ----
+                prefillInput('email', email);
+                prefillInput('username', userName);
+                prefillInput('firstName', user.firstname);
+                prefillInput('lastName', user.lastname);
+                prefillInput('linkedin', user.linkedInURL);
+                prefillInput('dob', user.dob);
+                prefillSelectByValue('gender', user.gender);
+                prefillCheckbox('#certification', !!user.declarationAccepted);
+
+                const location = user.location || {};
+                prefillInput('city', location.city);
+                prefillInput('state', location.state);
+                prefillInput('country', location.country);
+                prefillInput('locationSearch', [location.city, location.state, location.country].filter(Boolean).join(', '));
+                prefillInput('pin', location.pincode);
+
+                if (user.dpURL) {
+                    const preview = document.getElementById('avatarPreview');
+                    preview.style.backgroundImage = 'url(' + user.dpURL + ')';
+                    preview.classList.add('has-image');
+                    preview.innerHTML = '';
+                }
+
+                // A file input can't be pre-populated with a previously uploaded file (browser
+                // security), so mark the group as already satisfied and show what's on file instead.
+                if (Array.isArray(user.documents) && user.documents.length > 0) {
+                    const doc = user.documents[0];
+                    const group = document.querySelector('.required-group[data-check="files"]');
+                    if (group) {
+                        group.dataset.hasExistingFile = 'true';
+                        clearGroupError(group);
+                        const dropzone = group.querySelector('.file-upload');
+                        if (dropzone) {
+                            dropzone.classList.add('has-file');
+                            const textEl = dropzone.querySelector('.upload-text');
+                            const filenameEl = dropzone.querySelector('.upload-filename');
+                            if (textEl) textEl.textContent = 'Document already uploaded';
+                            if (filenameEl) {
+                                const name = doc.fileUrl ? doc.fileUrl.split('/').pop() : 'Uploaded document';
+                                filenameEl.textContent = name + ' (click to replace)';
+                            }
+                        }
+                    }
+                }
+
+                if (email && userName) {
+                    lockVerifiedEmailAndUsername(true);
+                } else if (userName) {
+                    // Username was already reserved in a previous session; let the user proceed to email.
+                    setEmailGating(true);
+                }
+
+                // ---- Company information ----
+                const company = user.companyDetails || {};
+                prefillInput('companyName', company.companyName);
+                prefillInput('designation', formatTitleLabel(company.designation));
+                prefillInput('gstNumber', company.GSTNumber);
+                prefillToggleGroup('[data-group-name="Nature of Business"]', company.natureOfBusiness);
+                prefillToggleGroup('[data-group-name="Type of Company"]', company.companyType);
+                if (company.companyLocation && company.companyLocation[0]) {
+                    const compLoc = company.companyLocation[0];
+                    prefillInput('companyLocation', compLoc.city);
+                    prefillInput('companyState', compLoc.state);
+                    prefillInput('companyCountry', compLoc.country);
+                    prefillInput('companyLocationSearch', [compLoc.city, compLoc.state, compLoc.country].filter(Boolean).join(', '));
+                }
+                if (company.organizationURL) {
+                    const site = Array.isArray(company.organizationURL) ? company.organizationURL[0] : company.organizationURL;
+                    prefillInput('websiteUrl', typeof site === 'string' ? site : (site && site.url));
+                }
+
+                // ---- Partnerships & collaboration ----
+                const collab = user.collaborationDetails || {};
+                if (Array.isArray(collab.collaborationIndustries) && collab.collaborationIndustries[0]) {
+                    prefillInput('channelPartnerIndustry', formatTitleLabel(collab.collaborationIndustries[0]));
+                }
+                if (collab.collaborationLocation && collab.collaborationLocation[0]) {
+                    const collabLoc = collab.collaborationLocation[0];
+                    prefillInput('channelPartnerLocation', collabLoc.city);
+                    prefillInput('channelPartnerLocationState', collabLoc.state);
+                    prefillInput('channelPartnerLocationCountry', collabLoc.country);
+                    prefillInput('channelPartnerLocationSearch', [collabLoc.city, collabLoc.state, collabLoc.country].filter(Boolean).join(', '));
+                }
+                prefillInput('channelPartnerNote', collab.collaborationNotes);
+
+                // Only touch the checkbox states if partner data was actually saved before —
+                // otherwise leave the form's sensible checked-by-default state alone.
+                if (collab.partner) {
+                    const partner = collab.partner;
+                    const productTypes = new Set((partner.product || []).map((p) => p.type));
+                    const productByType = {};
+                    (partner.product || []).forEach((p) => { productByType[p.type] = p; });
+
+                    prefillCheckbox('#product-tab input[type="checkbox"]#skills', productTypes.has('skills'));
+                    if (productByType.skills) prefillInputBySelector('#product-tab input[type="text"]#skills', productByType.skills.value);
+                    prefillCheckbox('#product-tab input[type="checkbox"]#manufacturing', productTypes.has('manufacturing'));
+                    if (productByType.manufacturing && productByType.manufacturing.location) {
+                        const mfgLoc = productByType.manufacturing.location;
+                        prefillInput('manufacturingLocation', mfgLoc.city);
+                        prefillInput('manufacturingLocationState', mfgLoc.state);
+                        prefillInput('manufacturingLocationCountry', mfgLoc.country);
+                        prefillInput('manufacturingLocationSearch', [mfgLoc.city, mfgLoc.state, mfgLoc.country].filter(Boolean).join(', '));
+                    }
+                    prefillCheckbox('#product-tab input[type="checkbox"]#warehouse', productTypes.has('warehouse'));
+                    prefillCheckbox('#product-tab input[type="checkbox"]#retail', productTypes.has('retail'));
+                    prefillCheckbox('#product-tab input[type="checkbox"]#distribution', productTypes.has('distribution'));
+                    prefillCheckbox('#product-tab input[type="checkbox"]#team', productTypes.has('team'));
+                    if (productByType.team) prefillInput('employees', productByType.team.fullTimeEmployees);
+
+                    const serviceTypes = new Set((partner.services || []).map((s) => s.type));
+                    const serviceByType = {};
+                    (partner.services || []).forEach((s) => { serviceByType[s.type] = s; });
+
+                    prefillCheckbox('#services-tab input[type="checkbox"]#skills2', serviceTypes.has('skills'));
+                    if (serviceByType.skills) prefillInputBySelector('#services-tab input[type="text"]#skills2', serviceByType.skills.value);
+                    prefillCheckbox('#services-tab input[type="checkbox"]#offices', serviceTypes.has('offices'));
+                    prefillCheckbox('#services-tab input[type="checkbox"]#team-services', serviceTypes.has('team'));
+                    if (serviceByType.team) prefillInput('employees-services', serviceByType.team.fullTimeEmployees);
+                }
+
+                // ---- Share your problem ----
+                prefillInput('problemStatement', user.userProblem);
+
+                // Application already submitted — lock every field, no further edits allowed.
+                if (user.isDraft) {
+                    lockFormFields();
+                    showAlreadySubmittedModal();
+                }
+            } catch (err) {
+                // Non-fatal: leave the fields blank if details aren't available yet.
+            }
+        })();
+
+        // Once the application has been submitted, the progress bar always reads
+        // "Step 4 of 4 / 100% Complete" no matter which step is currently being viewed.
+        let applicationSubmitted = false;
+
+        function showAlreadySubmittedModal() {
+            document.getElementById('alreadySubmittedModal').style.display = 'flex';
+        }
+
+        function closeAlreadySubmittedModal() {
+            document.getElementById('alreadySubmittedModal').style.display = 'none';
+        }
+
+        // Disables every input/select/textarea/toggle-button across all 4 steps and turns
+        // each step's "Save & Continue" into a plain "Next" (no more saving — nothing left to save).
+        function lockFormFields() {
+            applicationSubmitted = true;
+            document.querySelectorAll('.main-content input, .main-content select, .main-content textarea, .main-content .btn-toggle').forEach(el => {
+                if (el.closest('.button-group')) return;
+                el.disabled = true;
+            });
+            document.querySelectorAll('.avatar-upload, .file-upload').forEach(el => {
+                el.classList.add('locked-upload');
+            });
+            document.querySelectorAll('.button-group button').forEach(btn => {
+                const onclickAttr = btn.getAttribute('onclick') || '';
+                const match = onclickAttr.match(/handleSaveAndContinue\(\d+,\s*(\d+)/);
+                if (match) {
+                    const nextStep = parseInt(match[1], 10);
+                    btn.removeAttribute('onclick');
+                    btn.innerHTML = 'Next';
+                    btn.onclick = () => goToStep(nextStep);
+                }
+            });
+            // Already submitted — no resubmitting or re-drafting. Back stays enabled for navigation.
+            document.getElementById('submitApplicationBtn').disabled = true;
+            document.getElementById('step4SaveDraftBtn').disabled = true;
+
+            // Refresh the progress bar/text for whichever step is currently showing.
+            goToStep(getCurrentStep());
+        }
+
         function goToStep(step) {
             // Hide all sections
             document.querySelectorAll('.form-section').forEach(section => {
@@ -726,9 +1217,13 @@
                 '100% Complete'
             ];
 
-            document.getElementById('progressFill').style.width = progressPercentages[step - 1] + '%';
-            document.getElementById('stepText').textContent = progressTexts[step - 1];
-            document.getElementById('percentText').textContent = percentTexts[step - 1];
+            const widthPct = applicationSubmitted ? '100%' : progressPercentages[step - 1] + '%';
+            const stepLabel = applicationSubmitted ? 'Step 4 of 4' : progressTexts[step - 1];
+            const percentLabel = applicationSubmitted ? '100% Complete' : percentTexts[step - 1];
+
+            ['progressFill', 'progressFillMobile'].forEach(id => { document.getElementById(id).style.width = widthPct; });
+            ['stepText', 'stepTextMobile'].forEach(id => { document.getElementById(id).textContent = stepLabel; });
+            ['percentText', 'percentTextMobile'].forEach(id => { document.getElementById(id).textContent = percentLabel; });
 
             // Keep the current step in the URL so a page reload restores it
             const url = new URL(window.location.href);
@@ -761,8 +1256,259 @@
             document.getElementById(tabId + '-tab').style.display = 'block';
         }
 
-        function submitForm() {
-            alert('Form submitted successfully!');
+        function formVal(id) {
+            const el = document.getElementById(id);
+            return el ? el.value.trim() : '';
+        }
+
+        function formIsChecked(selector) {
+            const el = document.querySelector(selector);
+            return !!(el && el.checked);
+        }
+
+        function formValBySelector(selector) {
+            const el = document.querySelector(selector);
+            return el ? el.value.trim() : '';
+        }
+
+        function formActiveToggleLabels(groupSelector) {
+            return Array.from(document.querySelectorAll(groupSelector + ' .btn-toggle.active'))
+                .map((btn) => btn.textContent.trim());
+        }
+
+        function appendFormFields(formData, payload) {
+            Object.entries(payload).forEach(([key, value]) => {
+                formData.append(key, typeof value === 'object' ? JSON.stringify(value) : value);
+            });
+        }
+
+        function appendAvatarAndDocuments(formData) {
+            const avatarInput = document.getElementById('profileImage');
+            if (avatarInput.files && avatarInput.files[0]) {
+                formData.append('dpURL', avatarInput.files[0]);
+            }
+            const docInput = document.getElementById('idProof');
+            if (docInput.files && docInput.files[0]) {
+                formData.append('documents', docInput.files[0]);
+            }
+        }
+
+        // Personal Information (Step 1) only — used for its Save & Continue action so the
+        // request doesn't send empty company/collaboration/problem data it hasn't collected yet.
+        function buildStep1FormData() {
+            const storedPhone = localStorage.getItem('privePhoneNumber') || '';
+
+            const payload = {
+                phone: '+91' + storedPhone.replace(/\D/g, '').slice(-10),
+                firstname: formVal('firstName'),
+                lastname: formVal('lastName'),
+                gender: formVal('gender').toLowerCase(),
+                dob: formVal('dob'),
+                location: {
+                    city: formVal('city'),
+                    state: formVal('state'),
+                    country: formVal('country'),
+                    pincode: formVal('pin')
+                },
+                linkedInURL: formVal('linkedin'),
+                declarationAccepted: formIsChecked('#certification'),
+                currentPage: 'personalInformation'
+            };
+
+            const formData = new FormData();
+            appendFormFields(formData, payload);
+            appendAvatarAndDocuments(formData);
+            return formData;
+        }
+
+        // Company Information (Step 2) only — used for its Save & Continue action.
+        function buildStep2FormData() {
+            const storedPhone = localStorage.getItem('privePhoneNumber') || '';
+
+            const payload = {
+                phone: '+91' + storedPhone.replace(/\D/g, '').slice(-10),
+                organizationURL: formVal('websiteUrl'),
+                companyDetails: {
+                    companyName: formVal('companyName'),
+                    designation: formVal('designation').toLowerCase(),
+                    companyLocation: [{ city: formVal('companyLocation'), state: formVal('companyState'), country: formVal('companyCountry') }],
+                    organizationURL: formVal('websiteUrl'),
+                    natureOfBusiness: formActiveToggleLabels('[data-group-name="Nature of Business"]').join(', '),
+                    companyType: formActiveToggleLabels('[data-group-name="Type of Company"]').join(', '),
+                    GSTNumber: formVal('gstNumber')
+                },
+                currentPage: 'companyInformation'
+            };
+
+            const formData = new FormData();
+            appendFormFields(formData, payload);
+            return formData;
+        }
+
+        // Collaboration checkboxes share ids with their paired text inputs in the markup
+        // (e.g. "skills" is both the checkbox and its text field) — disambiguate by type.
+        function buildCollaborationDetails() {
+            const productEntries = [];
+            if (formIsChecked('#product-tab input[type="checkbox"]#skills')) {
+                productEntries.push({ type: 'skills', value: formValBySelector('#product-tab input[type="text"]#skills') });
+            }
+            if (formIsChecked('#product-tab input[type="checkbox"]#manufacturing')) {
+                const mfgCity = formVal('manufacturingLocation');
+                const mfgCountry = formVal('manufacturingLocationCountry') || 'India';
+                // Backend requires state as a non-empty string — Photon doesn't always return one
+                // (e.g. union territories, city-states), so fall back to city/country rather than "".
+                const mfgState = formVal('manufacturingLocationState') || mfgCity || mfgCountry;
+                productEntries.push({ type: 'manufacturing', location: { city: mfgCity, state: mfgState, country: mfgCountry } });
+            }
+            if (formIsChecked('#product-tab input[type="checkbox"]#warehouse')) {
+                productEntries.push({ type: 'warehouse' });
+            }
+            if (formIsChecked('#product-tab input[type="checkbox"]#retail')) {
+                productEntries.push({ type: 'retail' });
+            }
+            if (formIsChecked('#product-tab input[type="checkbox"]#distribution')) {
+                productEntries.push({ type: 'distribution' });
+            }
+            if (formIsChecked('#product-tab input[type="checkbox"]#team')) {
+                productEntries.push({ type: 'team', fullTimeEmployees: parseInt(formVal('employees'), 10) || 0 });
+            }
+
+            const serviceEntries = [];
+            if (formIsChecked('#services-tab input[type="checkbox"]#skills2')) {
+                serviceEntries.push({ type: 'skills', value: formValBySelector('#services-tab input[type="text"]#skills2') });
+            }
+            if (formIsChecked('#services-tab input[type="checkbox"]#offices')) {
+                serviceEntries.push({ type: 'offices' });
+            }
+            if (formIsChecked('#services-tab input[type="checkbox"]#team-services')) {
+                serviceEntries.push({ type: 'team', fullTimeEmployees: parseInt(formVal('employees-services'), 10) || 0 });
+            }
+
+            const channelPartnerIndustryValue = formVal('channelPartnerIndustry');
+            const collaborationIndustries = channelPartnerIndustryValue ? [channelPartnerIndustryValue.toLowerCase()] : [];
+
+            return {
+                collaborationIndustries: collaborationIndustries,
+                collaborationLocation: [{ city: formVal('channelPartnerLocation'), state: formVal('channelPartnerLocationState'), country: formVal('channelPartnerLocationCountry') }],
+                collaborationNotes: formVal('channelPartnerNote'),
+                partner: {
+                    product: productEntries,
+                    services: serviceEntries
+                }
+            };
+        }
+
+        // Partnerships & Collaboration (Step 3) only — used for its Save & Continue action.
+        function buildStep3FormData() {
+            const storedPhone = localStorage.getItem('privePhoneNumber') || '';
+
+            const payload = {
+                phone: '+91' + storedPhone.replace(/\D/g, '').slice(-10),
+                collaborationDetails: buildCollaborationDetails(),
+                currentPage: 'collaborationDetails'
+            };
+
+            const formData = new FormData();
+            appendFormFields(formData, payload);
+            return formData;
+        }
+
+        // Share your problem (Step 4) only — used for its Save Draft action.
+        function buildStep4FormData(isDraft) {
+            const storedPhone = localStorage.getItem('privePhoneNumber') || '';
+
+            const payload = {
+                phone: '+91' + storedPhone.replace(/\D/g, '').slice(-10),
+                isDraft: !!isDraft,
+                currentPage: 'userProblem',
+                userProblem: formVal('problemStatement')
+            };
+
+            const formData = new FormData();
+            appendFormFields(formData, payload);
+            return formData;
+        }
+
+        // Final "Submit Application" — all step data is already saved via each step's draft
+        // save, so this call just flips the draft to completed.
+        function buildFinalSubmitFormData() {
+            const storedPhone = localStorage.getItem('privePhoneNumber') || '';
+
+            const payload = {
+                phone: '+91' + storedPhone.replace(/\D/g, '').slice(-10),
+                isDraft: true,
+                currentPage: 'completed'
+            };
+
+            const formData = new FormData();
+            appendFormFields(formData, payload);
+            return formData;
+        }
+
+        async function submitForm() {
+            const submitBtn = document.getElementById('submitApplicationBtn');
+            const originalLabel = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+
+            try {
+                const formData = buildFinalSubmitFormData();
+                const response = await axios.patch(window.ENV.API_BASE_URL + '/addUser', formData);
+                const data = response.data;
+                if (!data.success) {
+                    throw new Error(data.message || 'Failed to submit application.');
+                }
+                submitBtn.textContent = 'Submitted';
+                // Application is complete — end the session so the user can't linger on the locked form.
+                setTimeout(logout, 1200);
+            } catch (err) {
+                showToast(getApiErrorMessage(err, 'Failed to submit application. Please try again.'));
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalLabel;
+            }
+        }
+
+        // Persists progress so far — used by each step's "Save & Continue" (and Step 4's
+        // "Save Draft") action so nothing is lost as the user moves through the form.
+        async function saveDraftToServer(button, step) {
+            const originalHtml = button ? button.innerHTML : '';
+            if (button) {
+                button.disabled = true;
+                button.textContent = 'Saving...';
+            }
+
+            try {
+                let formData;
+                if (step === 1) {
+                    formData = buildStep1FormData();
+                } else if (step === 2) {
+                    formData = buildStep2FormData();
+                } else if (step === 3) {
+                    formData = buildStep3FormData();
+                } else {
+                    formData = buildStep4FormData(false);
+                }
+                const response = await axios.patch(window.ENV.API_BASE_URL + '/addUser', formData);
+                const data = response.data;
+                if (!data.success) {
+                    throw new Error(data.message || 'Failed to save draft.');
+                }
+                return true;
+            } catch (err) {
+                showToast(getApiErrorMessage(err, 'Failed to save draft. Please try again.'));
+                return false;
+            } finally {
+                if (button) {
+                    button.disabled = false;
+                    button.innerHTML = originalHtml;
+                }
+            }
+        }
+
+        async function handleSaveAndContinue(currentStep, nextStep, button) {
+            if (!validateStep(currentStep)) return;
+            await saveDraftToServer(button, currentStep);
+            goToStep(nextStep);
         }
 
         // Mobile Menu Toggle
@@ -808,6 +1554,7 @@
             });
 
             icon.addEventListener('click', function () {
+                if (checkbox.disabled) return;
                 checkbox.checked = !checkbox.checked;
                 checkbox.dispatchEvent(new Event('change'));
             });
@@ -829,6 +1576,98 @@
             });
         }
         restrictToPattern(document.getElementById('username'), /[^a-zA-Z0-9_]/g);
+
+        document.getElementById('email').addEventListener('input', function() {
+            this.setCustomValidity('');
+            applyEmailRejectionState();
+        });
+
+        document.getElementById('email').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const actionBtn = document.getElementById('emailActionBtn');
+                if (!actionBtn.disabled) {
+                    sendEmailOtp();
+                }
+            }
+        });
+
+        // ---------- Username availability check ----------
+        (function setupUsernameAvailability() {
+            const usernameInput = document.getElementById('username');
+            const usernameStatus = document.getElementById('usernameStatus');
+            let debounceTimer = null;
+            let checkToken = 0;
+
+            function setStatus(state, message) {
+                usernameStatus.className = 'username-status' + (state ? ' ' + state : '');
+                if (state === 'available') {
+                    usernameStatus.innerHTML = '<i class="material-icons">check_circle</i> ' + message;
+                    localStorage.setItem('priveUsernameAvailable', 'true');
+                } else if (state === 'unavailable') {
+                    usernameStatus.innerHTML = '<i class="material-icons">cancel</i> ' + message;
+                    localStorage.setItem('priveUsernameAvailable', 'false');
+                } else {
+                    usernameStatus.textContent = message;
+                    localStorage.removeItem('priveUsernameAvailable');
+                }
+                setEmailGating(state === 'available');
+            }
+
+            // Success responses carry availability in `result.available`; the shared
+            // { success:false, message } error shape (e.g. "already taken") has no `result.available`.
+            function interpretResponse(data) {
+                if (!data) return null;
+                const available = data.result && data.result.available;
+                if (available === true) return { available: true, message: data.message };
+                if (available === false) return { available: false, message: data.message };
+                if (data.success === false) return { available: false, message: data.message || 'Username is not available' };
+                return null;
+            }
+
+            async function checkAvailability(value) {
+                const token = ++checkToken;
+                setStatus('', 'Checking availability...');
+
+                // TEMPORARY (testing only): force "hero" to always show as unavailable,
+                // without hitting the API, so the unavailable state can be verified on demand.
+                if (value.toLowerCase() === 'hero') {
+                    setStatus('unavailable', 'Username is not available');
+                    return;
+                }
+
+                let result = null;
+                try {
+                    const response = await axios.post(window.ENV.API_BASE_URL + '/validateUserName', { userName: value });
+                    result = interpretResponse(response.data);
+                } catch (err) {
+                    result = interpretResponse(err.response && err.response.data);
+                }
+
+                if (token !== checkToken || value !== usernameInput.value.trim()) return;
+
+                if (result && result.available === true) {
+                    setStatus('available', result.message || 'Username is available');
+                } else if (result && result.available === false) {
+                    setStatus('unavailable', result.message || 'Username is not available');
+                } else {
+                    setStatus('', 'Could not check username availability. Please try again.');
+                }
+            }
+
+            usernameInput.addEventListener('input', () => {
+                const value = usernameInput.value.trim();
+                clearTimeout(debounceTimer);
+                checkToken++;
+
+                if (value.length < 3) {
+                    setStatus('', 'Enter min. 3 characters');
+                    return;
+                }
+
+                debounceTimer = setTimeout(() => checkAvailability(value), 500);
+            });
+        })();
 
         function attachDateMask(el) {
             if (!el) return;
@@ -853,13 +1692,105 @@
                 el.value = el.value.replace(/[0-9]/g, '');
             });
         }
-        ['city', 'companyLocation', 'partnerCity', 'partnerCountry', 'manufacturingLocation', 'channelPartnerLocation'].forEach(id => {
+        ['partnerCity', 'partnerCountry'].forEach(id => {
             restrictNoDigits(document.getElementById(id));
         });
 
         // ---------- Email OTP verification ----------
-        const EMAIL_OTP = '123456';
         let emailVerified = false;
+
+        // Tracks the last email the backend rejected (e.g. "already registered"), so retyping
+        // the exact same address keeps "Validate email" disabled until it's actually changed.
+        let lastRejectedEmail = null;
+        let lastRejectedMessage = '';
+
+        function markEmailRejected(email, message) {
+            lastRejectedEmail = email;
+            lastRejectedMessage = message;
+            applyEmailRejectionState();
+        }
+
+        function applyEmailRejectionState() {
+            const emailInput = document.getElementById('email');
+            const actionBtn = document.getElementById('emailActionBtn');
+            const emailError = document.getElementById('emailError');
+            if (emailInput.disabled) return; // username gating already governs the disabled state
+
+            const currentValue = emailInput.value.trim();
+            if (lastRejectedEmail && currentValue === lastRejectedEmail) {
+                actionBtn.disabled = true;
+                emailInput.classList.add('error');
+                emailError.textContent = lastRejectedMessage;
+                emailError.style.display = 'block';
+            } else {
+                actionBtn.disabled = false;
+                emailInput.classList.remove('error');
+                emailError.style.display = 'none';
+            }
+        }
+
+        // Email can only be entered/validated once the username is confirmed available.
+        // If the username later becomes invalid again, email is immediately locked back down.
+        function setEmailGating(enabled) {
+            if (emailVerified) return; // already fully verified, username can't change anymore anyway
+
+            const emailInput = document.getElementById('email');
+            const emailActionBtn = document.getElementById('emailActionBtn');
+            const gatingHint = document.getElementById('emailGatingHint');
+
+            emailInput.disabled = !enabled;
+            if (gatingHint) {
+                gatingHint.style.display = enabled ? 'none' : 'block';
+            }
+
+            if (!enabled) {
+                emailActionBtn.disabled = true;
+                emailInput.classList.remove('error');
+                const emailError = document.getElementById('emailError');
+                if (emailError) {
+                    emailError.style.display = 'none';
+                }
+                const otpBlock = document.getElementById('emailOtpBlock');
+                if (otpBlock.style.display !== 'none') {
+                    stopEmailOtpTimer();
+                    otpBlock.style.display = 'none';
+                    document.getElementById('emailLabel').style.display = 'block';
+                    document.getElementById('emailActionRow').style.display = 'flex';
+                }
+            } else {
+                applyEmailRejectionState();
+            }
+        }
+
+        // Locks username + email once the email is confirmed verified (either just now, or
+        // already verified in a previous session per getUserDetails). `fromSavedData` shows
+        // the badge in blue (already-saved) instead of green (just verified this session).
+        function lockVerifiedEmailAndUsername(fromSavedData) {
+            emailVerified = true;
+            stopEmailOtpTimer();
+
+            document.getElementById('emailOtpBlock').style.display = 'none';
+            document.getElementById('emailLabel').style.display = 'block';
+            document.getElementById('emailActionRow').style.display = 'flex';
+            document.getElementById('email').disabled = true;
+            document.getElementById('emailActionBtn').style.display = 'none';
+            document.getElementById('emailGatingHint').style.display = 'none';
+
+            const badge = document.getElementById('emailVerifiedBadge');
+            badge.style.display = 'inline-flex';
+            badge.classList.toggle('saved', !!fromSavedData);
+            const badgeIcon = badge.querySelector('img');
+            if (badgeIcon) {
+                badgeIcon.src = fromSavedData ? 'icons/verified-blue.svg' : 'icons/verified.svg';
+            }
+
+            const usernameInput = document.getElementById('username');
+            usernameInput.disabled = true;
+            const usernameStatus = document.getElementById('usernameStatus');
+            if (usernameStatus) {
+                usernameStatus.style.display = 'none';
+            }
+        }
 
         function maskEmail(email) {
             const [local, domain] = email.split('@');
@@ -868,8 +1799,47 @@
             return visible + '*'.repeat(Math.max(local.length - 3, 3)) + '@' + domain;
         }
 
-        function sendEmailOtp() {
+        // ---------- Email OTP resend timer (60s) ----------
+        let emailOtpTimerInterval = null;
+        let emailOtpSecondsRemaining = 60;
+
+        function formatOtpTime(totalSeconds) {
+            const mm = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+            const ss = String(totalSeconds % 60).padStart(2, '0');
+            return mm + ':' + ss;
+        }
+
+        function startEmailOtpTimer() {
+            const timerText = document.getElementById('emailOtpTimerText');
+            const resendBtn = document.getElementById('emailResendBtn');
+
+            emailOtpSecondsRemaining = 60;
+            timerText.style.display = 'inline';
+            timerText.textContent = 'Resend OTP in: ' + formatOtpTime(emailOtpSecondsRemaining);
+            resendBtn.style.display = 'none';
+
+            clearInterval(emailOtpTimerInterval);
+            emailOtpTimerInterval = setInterval(() => {
+                emailOtpSecondsRemaining--;
+                if (emailOtpSecondsRemaining <= 0) {
+                    clearInterval(emailOtpTimerInterval);
+                    timerText.style.display = 'none';
+                    resendBtn.style.display = 'inline';
+                    return;
+                }
+                timerText.textContent = 'Resend OTP in: ' + formatOtpTime(emailOtpSecondsRemaining);
+            }, 1000);
+        }
+
+        function stopEmailOtpTimer() {
+            clearInterval(emailOtpTimerInterval);
+            document.getElementById('emailOtpTimerText').style.display = 'none';
+            document.getElementById('emailResendBtn').style.display = 'none';
+        }
+
+        async function sendEmailOtp() {
             const emailInput = document.getElementById('email');
+            const emailError = document.getElementById('emailError');
             const email = emailInput.value.trim();
             const validPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -877,25 +1847,76 @@
                 emailInput.setCustomValidity('Please enter a valid email address.');
                 emailInput.classList.add('error');
                 emailInput.reportValidity();
+                emailError.textContent = 'Please enter a valid email address.';
+                emailError.style.display = 'block';
                 showToast('Please enter a valid email address.');
                 return;
             }
             emailInput.setCustomValidity('');
             emailInput.classList.remove('error');
+            emailError.style.display = 'none';
+
+            const actionBtn = document.getElementById('emailActionBtn');
+            const originalLabel = actionBtn.textContent;
+            actionBtn.disabled = true;
+            actionBtn.textContent = 'Sending OTP...';
+
+            try {
+                const response = await axios.post(window.ENV.API_BASE_URL + '/verifyUserInfoandSendOTP', { email });
+                const data = response.data;
+
+                if (data.usernameValidStatus === false) {
+                    showToast(data.message || 'Please choose a different username before continuing.');
+                    return;
+                }
+                if (data.emailValidStatus === false) {
+                    markEmailRejected(email, data.message || 'This email address is not valid or already in use.');
+                    return;
+                }
+                if (!data.success) {
+                    throw new Error(data.message || 'Failed to send OTP.');
+                }
+
+                const otpInput = document.getElementById('emailOtpInput');
+                otpInput.value = '';
+                otpInput.classList.remove('error');
+
+                document.getElementById('emailLabel').style.display = 'none';
+                document.getElementById('emailActionRow').style.display = 'none';
+                document.getElementById('emailOtpBlock').style.display = 'block';
+                document.getElementById('emailOtpMasked').textContent = maskEmail(email);
+                document.getElementById('emailOtpError').style.display = 'none';
+                document.getElementById('emailVerifyBtn').disabled = true;
+
+                startEmailOtpTimer();
+                otpInput.focus();
+                showToast(data.message || 'OTP sent to your email.', 'success');
+            } catch (err) {
+                markEmailRejected(email, getApiErrorMessage(err, 'Failed to send OTP. Please try again.'));
+            } finally {
+                actionBtn.textContent = originalLabel;
+                applyEmailRejectionState();
+            }
+        }
+
+        function editEmail() {
+            stopEmailOtpTimer();
+            document.getElementById('emailOtpBlock').style.display = 'none';
+            document.getElementById('emailLabel').style.display = 'block';
+            document.getElementById('emailActionRow').style.display = 'flex';
+
+            const emailInput = document.getElementById('email');
+            emailInput.disabled = false;
+            emailInput.classList.remove('error');
+            document.getElementById('emailError').style.display = 'none';
+            emailInput.focus();
+            emailInput.select();
 
             const otpInput = document.getElementById('emailOtpInput');
             otpInput.value = '';
             otpInput.classList.remove('error');
-
-            document.getElementById('emailLabel').style.display = 'none';
-            document.getElementById('emailActionRow').style.display = 'none';
-            document.getElementById('emailOtpBlock').style.display = 'block';
-            document.getElementById('emailOtpMasked').textContent = maskEmail(email);
             document.getElementById('emailOtpError').style.display = 'none';
             document.getElementById('emailVerifyBtn').disabled = true;
-
-            otpInput.focus();
-            showToast('OTP sent to your email.', 'success');
         }
 
         (function setupEmailOtpInput() {
@@ -908,29 +1929,64 @@
                 otpError.style.display = 'none';
                 document.getElementById('emailVerifyBtn').disabled = otpInput.value.length !== 6;
             });
+
+            otpInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const verifyBtn = document.getElementById('emailVerifyBtn');
+                    if (!verifyBtn.disabled) {
+                        verifyEmailOtp();
+                    }
+                }
+            });
         })();
 
-        function verifyEmailOtp() {
+        async function verifyEmailOtp() {
             const otpInput = document.getElementById('emailOtpInput');
             const entered = otpInput.value;
             const otpError = document.getElementById('emailOtpError');
+            const email = document.getElementById('email').value.trim();
 
-            if (entered !== EMAIL_OTP) {
+            const verifyBtn = document.getElementById('emailVerifyBtn');
+            const originalLabel = verifyBtn.textContent;
+            verifyBtn.disabled = true;
+            verifyBtn.textContent = 'Verifying...';
+
+            try {
+                const response = await axios.post(window.ENV.API_BASE_URL + '/verifyUserEmailOTPandPostUserInfo', {
+                    email,
+                    otp: entered
+                });
+                const data = response.data;
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Incorrect OTP. Please try again.');
+                }
+
+                const userResult = (data.result && data.result[0]) || {};
+                if (userResult.accessToken) {
+                    setSession({
+                        accessToken: userResult.accessToken,
+                        userCode: userResult.userCode,
+                        phoneNumber: data.phone
+                    });
+                }
+
+                lockVerifiedEmailAndUsername();
+                showToast(data.message || 'Email verified successfully.', 'success');
+            } catch (err) {
                 otpInput.classList.add('error');
-                otpError.textContent = 'Incorrect OTP. Please try again.';
-                otpError.style.display = 'block';
-                showToast('Incorrect OTP. Please try again.');
-                return;
-            }
+                const message = getApiErrorMessage(err, 'Incorrect OTP. Please try again.');
 
-            emailVerified = true;
-            document.getElementById('emailOtpBlock').style.display = 'none';
-            document.getElementById('emailLabel').style.display = 'block';
-            document.getElementById('emailActionRow').style.display = 'flex';
-            document.getElementById('email').disabled = true;
-            document.getElementById('emailActionBtn').style.display = 'none';
-            document.getElementById('emailVerifiedBadge').style.display = 'inline-flex';
-            showToast('Email verified successfully.', 'success');
+                if (/expired|doesn.t exist|does not exist/i.test(message)) {
+                    otpError.textContent = 'OTP expired';
+                } else {
+                    otpError.textContent = message;
+                }
+                otpError.style.display = 'block';
+                verifyBtn.disabled = false;
+                verifyBtn.textContent = originalLabel;
+            }
         }
 
         // ---------- Profile image upload ----------
@@ -1078,8 +2134,9 @@
                 const checkType = group.dataset.check || 'toggle';
                 let satisfied;
                 if (checkType === 'files') {
-                    satisfied = Array.from(group.querySelectorAll('input[type="file"]'))
-                        .some(input => input.files && input.files.length > 0);
+                    satisfied = group.dataset.hasExistingFile === 'true'
+                        || Array.from(group.querySelectorAll('input[type="file"]'))
+                            .some(input => input.files && input.files.length > 0);
                 } else {
                     satisfied = !!group.querySelector('.btn-toggle.active');
                 }
@@ -1144,10 +2201,20 @@
             goToStep(targetStep);
         }
 
-        function handleSubmit() {
-            if (validateStep(4)) {
-                submitForm();
+        // Step 4's single "Submit Application" button — saves the draft first, then
+        // immediately submits, so both PATCH calls happen back-to-back from one click.
+        // "Submit Application" stays disabled until "Save Draft" succeeds at least once.
+        async function handleStep4SaveDraft(button) {
+            if (!validateStep(4)) return;
+            const saved = await saveDraftToServer(button, 4);
+            if (saved) {
+                document.getElementById('submitApplicationBtn').disabled = false;
             }
+        }
+
+        async function handleSubmitApplication() {
+            if (!validateStep(4)) return;
+            await submitForm();
         }
 
         // ---------- Restore step from URL on reload ----------

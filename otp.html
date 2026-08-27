@@ -14,6 +14,8 @@
     </style>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="auth.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios@1/dist/axios.min.js"></script>
+    <script src="env.js"></script>
 </head>
 <body>
     <div class="auth-page">
@@ -30,21 +32,21 @@
                     <label>Enter OTP</label>
                     <div class="otp-row">
                         <input type="text" class="otp-box" maxlength="1" inputmode="numeric" autocomplete="one-time-code">
-                        <input type="text" class="otp-box" maxlength="1" inputmode="numeric">
-                        <input type="text" class="otp-box" maxlength="1" inputmode="numeric">
-                        <input type="text" class="otp-box" maxlength="1" inputmode="numeric">
-                        <input type="text" class="otp-box" maxlength="1" inputmode="numeric">
-                        <input type="text" class="otp-box" maxlength="1" inputmode="numeric">
+                        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" autocomplete="off">
+                        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" autocomplete="off">
+                        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" autocomplete="off">
+                        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" autocomplete="off">
+                        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" autocomplete="off">
                     </div>
                     <p class="auth-error-text" id="otpError">Incorrect OTP. Please try again.</p>
                     <div class="otp-timer">
-                        <span id="timerText">Time Remaining: 00:30</span>
+                        <span id="timerText">Time Remaining: 01:00</span>
                         <button type="button" class="otp-resend" id="resendBtn" style="display:none;">Resend OTP</button>
                     </div>
                 </div>
 
-                <button type="submit" class="auth-btn-primary">
-                    Verify
+                <button type="submit" class="auth-btn-primary" id="otpSubmitBtn">
+                    <span id="otpSubmitText">Verify</span>
                     <i class="material-icons" style="font-size: 18px;">arrow_forward</i>
                 </button>
             </form>
@@ -60,11 +62,21 @@
     <script>
         redirectIfAuthenticated();
 
+        // No active OTP transaction (e.g. opened directly without going through login) -> back to login
+        if (!getTransactionId()) {
+            window.location.href = 'login.html';
+        }
+
         const pendingMobile = sessionStorage.getItem('privePendingMobile');
         const masked = pendingMobile
             ? pendingMobile.slice(0, -8) + pendingMobile.slice(-8, -4).replace(/\d/g, '*') + pendingMobile.slice(-4)
             : '98******10';
         document.getElementById('otpSubtitle').textContent = 'We have sent OTP to your registered phone number ' + masked;
+
+        if (sessionStorage.getItem('priveOtpJustSent') === 'true') {
+            sessionStorage.removeItem('priveOtpJustSent');
+            showToast('OTP sent successfully to your number.', 'success');
+        }
 
         const otpBoxes = Array.from(document.querySelectorAll('.otp-box'));
         const otpError = document.getElementById('otpError');
@@ -118,11 +130,18 @@
 
         otpBoxes[0].focus();
 
-        // ---------- Countdown timer ----------
+        // ---------- Resend cooldown timer ----------
+        const RESEND_COOLDOWN_SECONDS = 60;
         const timerText = document.getElementById('timerText');
         const resendBtn = document.getElementById('resendBtn');
-        let secondsRemaining = 30;
+        let secondsRemaining = RESEND_COOLDOWN_SECONDS;
         let timerInterval = null;
+
+        function formatTime(totalSeconds) {
+            const mm = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+            const ss = String(totalSeconds % 60).padStart(2, '0');
+            return mm + ':' + ss;
+        }
 
         function tick() {
             secondsRemaining--;
@@ -130,18 +149,15 @@
                 clearInterval(timerInterval);
                 timerText.style.display = 'none';
                 resendBtn.style.display = 'inline-block';
-                showToast('OTP expired. Please resend to get a new code.');
                 return;
             }
-            const mm = String(Math.floor(secondsRemaining / 60)).padStart(2, '0');
-            const ss = String(secondsRemaining % 60).padStart(2, '0');
-            timerText.textContent = 'Time Remaining: ' + mm + ':' + ss;
+            timerText.textContent = 'Time Remaining: ' + formatTime(secondsRemaining);
         }
 
         function startTimer() {
-            secondsRemaining = 30;
+            secondsRemaining = RESEND_COOLDOWN_SECONDS;
             timerText.style.display = 'inline';
-            timerText.textContent = 'Time Remaining: 00:30';
+            timerText.textContent = 'Time Remaining: ' + formatTime(secondsRemaining);
             resendBtn.style.display = 'none';
             clearInterval(timerInterval);
             timerInterval = setInterval(tick, 1000);
@@ -149,19 +165,39 @@
 
         startTimer();
 
-        resendBtn.addEventListener('click', () => {
-            otpBoxes.forEach(box => {
-                box.value = '';
-                box.classList.remove('error');
-            });
-            otpError.classList.remove('visible');
-            otpBoxes[0].focus();
-            startTimer();
-            showToast('OTP resent successfully.', 'success');
+        resendBtn.addEventListener('click', async () => {
+            resendBtn.disabled = true;
+            try {
+                const response = await axios.post(window.ENV.API_BASE_URL + '/sendPhoneNumberOTP', {
+                    phoneNumber: pendingMobile,
+                    hashId: window.ENV.HASH_ID
+                });
+                const data = response.data;
+                if (!data.success) {
+                    throw new Error(data.message || 'Failed to resend OTP.');
+                }
+                setOtpTransaction(data.result);
+
+                otpBoxes.forEach(box => {
+                    box.value = '';
+                    box.classList.remove('error');
+                });
+                otpError.classList.remove('visible');
+                otpBoxes[0].focus();
+                startTimer();
+                showToast('OTP resent successfully.', 'success');
+            } catch (err) {
+                showToast(getApiErrorMessage(err, 'Failed to resend OTP. Please try again.'));
+            } finally {
+                resendBtn.disabled = false;
+            }
         });
 
-        // ---------- Verify (STATIC_OTP comes from auth.js) ----------
-        document.getElementById('otpForm').addEventListener('submit', (e) => {
+        // ---------- Verify ----------
+        const otpSubmitBtn = document.getElementById('otpSubmitBtn');
+        const otpSubmitText = document.getElementById('otpSubmitText');
+
+        document.getElementById('otpForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const entered = otpBoxes.map(box => box.value).join('');
             if (entered.length < 6) {
@@ -171,16 +207,31 @@
                 showToast('Please enter all 6 digits.');
                 return;
             }
-            if (entered !== STATIC_OTP) {
+
+            otpSubmitBtn.disabled = true;
+            otpSubmitText.textContent = 'Verifying...';
+
+            try {
+                const response = await axios.post(window.ENV.API_BASE_URL + '/verifyPhoneNumberOTP', {
+                    transactionId: getTransactionId(),
+                    providedOTP: entered
+                });
+                const data = response.data;
+                if (!data.success) {
+                    throw new Error(data.message || 'Incorrect OTP. Please try again.');
+                }
+                setSession(data.result);
+                showToast('Verified successfully.', 'success');
+                window.location.href = 'index.html';
+            } catch (err) {
                 otpBoxes.forEach(box => box.classList.add('error'));
-                otpError.textContent = 'Incorrect OTP. Please try again.';
+                const message = getApiErrorMessage(err, 'Incorrect OTP. Please try again.');
+                otpError.textContent = message;
                 otpError.classList.add('visible');
-                showToast('Incorrect OTP. Please try again.');
-                return;
+                showToast(message);
+                otpSubmitBtn.disabled = false;
+                otpSubmitText.textContent = 'Verify';
             }
-            setAuthenticated();
-            showToast('Verified successfully.', 'success');
-            window.location.href = 'index.html';
         });
     </script>
 </body>
