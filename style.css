@@ -634,6 +634,26 @@ select {
     margin-top: 40px;
 }
 
+.step4-button-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-top: 50px;
+    text-align: center;
+}
+
+.step4-button-subrow {
+    display: flex;
+    gap: 16px;
+}
+
+.step4-submit-btn {
+    width: auto;
+    padding: 14px 48px;
+    font-size: 16px;
+}
+
 button {
     padding: 12px 28px;
     border-radius: 6px;
@@ -1173,6 +1193,10 @@ select.error {
         margin-left: 0;
     }
 
+    .employees-label {
+        margin-left: 10px !important;
+    }
+
     .logo {
         max-width: 70px;
         height: auto;
@@ -1182,8 +1206,30 @@ select.error {
         font-size: 22px;
     }
 
+    .partnershipCollabDiv {
+        flex-direction: column;
+        gap: 0;
+    }
+
     .button-group {
         flex-direction: column;
+    }
+
+    .step4-button-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .step4-button-subrow {
+        width: 100%;
+    }
+
+    .step4-button-subrow button {
+        flex: 1;
+    }
+
+    .step4-submit-btn {
+        width: 100%;
     }
 
     label {
