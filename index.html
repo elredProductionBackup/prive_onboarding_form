@@ -539,11 +539,8 @@
                 </div>
 
                 <div class="step4-button-row">
-                    <div class="step4-button-subrow">
-                        <button class="btn-secondary" onclick="goToStep(3)">← Back</button>
-                        <button class="btn-secondary" id="step4SaveDraftBtn" onclick="handleStep4SaveDraft(this)">Save Draft</button>
-                    </div>
-                    <button class="btn-primary step4-submit-btn" id="submitApplicationBtn" onclick="handleSubmitApplication()" disabled>Submit Application</button>
+                    <button class="btn-secondary" onclick="goToStep(3)">← Back</button>
+                    <button class="btn-primary step4-submit-btn" id="submitApplicationBtn" onclick="handleSaveAndSubmit(this)">Submit Application</button>
                 </div>
             </div>
         </div>
@@ -1189,7 +1186,6 @@
             });
             // Already submitted — no resubmitting or re-drafting. Back stays enabled for navigation.
             document.getElementById('submitApplicationBtn').disabled = true;
-            document.getElementById('step4SaveDraftBtn').disabled = true;
 
             // Refresh the progress bar/text for whichever step is currently showing.
             goToStep(getCurrentStep());
@@ -2217,17 +2213,10 @@
 
         // Step 4's single "Submit Application" button — saves the draft first, then
         // immediately submits, so both PATCH calls happen back-to-back from one click.
-        // "Submit Application" stays disabled until "Save Draft" succeeds at least once.
-        async function handleStep4SaveDraft(button) {
+        async function handleSaveAndSubmit(button) {
             if (!validateStep(4)) return;
             const saved = await saveDraftToServer(button, 4);
-            if (saved) {
-                document.getElementById('submitApplicationBtn').disabled = false;
-            }
-        }
-
-        async function handleSubmitApplication() {
-            if (!validateStep(4)) return;
+            if (!saved) return;
             await submitForm();
         }
 
