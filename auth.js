@@ -36,6 +36,28 @@ if (typeof axios !== 'undefined') {
     });
 }
 
+// Catches expired/invalid JWT errors on any authenticated request. Shows the
+// "Session Expired" modal if the page has one (index.html); otherwise logs out directly.
+if (typeof axios !== 'undefined') {
+    axios.interceptors.response.use(
+        (response) => response,
+        (error) => {
+            const status = error.response && error.response.status;
+            const msg = ((error.response && error.response.data && error.response.data.message) || '').toLowerCase();
+            const isJwtError = status === 401 || msg.includes('jwt') || msg.includes('token');
+            if (isJwtError) {
+                const modal = document.getElementById('sessionExpiredModal');
+                if (modal) {
+                    modal.style.display = 'flex';
+                } else {
+                    logout();
+                }
+            }
+            return Promise.reject(error);
+        }
+    );
+}
+
 // Persists the sendPhoneNumberOTP API's `result` object (called on send + resend).
 function setOtpTransaction(result) {
     localStorage.setItem(TRANSACTION_ID_KEY, result.transactionId);

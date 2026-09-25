@@ -195,8 +195,6 @@
                             <option value="" selected disabled>Select</option>
                             <option>Male</option>
                             <option>Female</option>
-                            <option>Other</option>
-                            <option>Prefer not to say</option>
                         </select>
                     </div>
                 </div>
@@ -559,6 +557,17 @@
             <h2 class="modal-title">Already Submitted</h2>
             <p class="modal-subtitle">This form has already been completed. The submitted details cannot be changed.</p>
             <button class="btn-primary modal-close-btn" onclick="closeAlreadySubmittedModal()">Close</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="sessionExpiredModal" style="display:none;">
+        <div class="modal-card">
+            <div class="modal-icon-wrap">
+                <i class="material-icons">lock_clock</i>
+            </div>
+            <h2 class="modal-title">Session Expired</h2>
+            <p class="modal-subtitle">Your session has expired. Please log in again to continue.</p>
+            <button class="btn-primary modal-close-btn" onclick="handleSessionExpiredOk()">OK</button>
         </div>
     </div>
 
@@ -1151,6 +1160,10 @@
 
         function closeAlreadySubmittedModal() {
             document.getElementById('alreadySubmittedModal').style.display = 'none';
+        }
+
+        function handleSessionExpiredOk() {
+            logout();
         }
 
         // Disables every input/select/textarea/toggle-button across all 4 steps and turns
