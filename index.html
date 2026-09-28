@@ -596,8 +596,14 @@
                 suggestionsBox.innerHTML = '';
             }
 
+            // OSM often has no plain city node, only its admin boundary
+            // (e.g. "Bhubaneswar Municipal Corporation") — strip that noise for display.
+            function cleanCityName(name) {
+                return (name || '').replace(/\s*(Municipal Corporation|Nagar Nigam|Corporation|Municipality|Nagar Palika|Municipal Council)\s*$/i, '').trim();
+            }
+
             function formatSuggestion(props) {
-                const parts = [props.name, props.city, props.state, props.country].filter(Boolean);
+                const parts = [cleanCityName(props.name), props.city, props.state, props.country].filter(Boolean);
                 return parts.filter((v, i) => parts.indexOf(v) === i).join(', ');
             }
 
@@ -605,7 +611,7 @@
                 searchInput.value = formatSuggestion(props);
                 hideSuggestions();
                 config.onSelect({
-                    city: props.city || props.name || '',
+                    city: cleanCityName(props.city || props.name || ''),
                     // Photon omits "state" for some places (e.g. city-states, small towns) —
                     // fall back through other admin-level fields so we never send an empty string.
                     state: props.state || props.county || props.state_district || props.region || props.city || props.name || '',
@@ -651,8 +657,10 @@
                 spinner.classList.add('active');
 
                 try {
-                    const response = await axios.get('https://photon.komoot.io/api/', {
-                        params: { q: query, limit: 5, lang: 'en', bbox: '68,6,97.5,37.5' },
+                    const layers = ['city', 'state', 'country'];
+                    const response = await axios.get('https://photon.komoot.io/api/'
+                        + '?q=' + encodeURIComponent(query) + '&limit=5&lang=en&bbox=68,6,97.5,37.5'
+                        + layers.map(l => '&layer=' + l).join(''), {
                         signal: abortController.signal,
                         timeout: 6000
                     });
@@ -755,9 +763,15 @@
             const searchInput = document.getElementById(config.inputId);
             const suggestionsBox = document.getElementById(config.suggestionsId);
             const spinner = document.getElementById(config.spinnerId);
+            const PAGE_SIZE = 10;
             let debounceTimer = null;
             let abortController = null;
             let latestRequestId = 0;
+            let currentQuery = '';
+            let nextStart = 0;
+            let hasMore = true;
+            let loadingMore = false;
+            let seenLabels = new Set();
 
             function hideSuggestions() {
                 suggestionsBox.style.display = 'none';
@@ -769,25 +783,14 @@
                 return item.title || item.name || item.designation || item.value || '';
             }
 
-            function renderSuggestions(items) {
-                suggestionsBox.innerHTML = '';
-
-                const seen = new Set();
-                const labels = [];
+            function appendSuggestions(items) {
                 items.forEach((item) => {
                     const raw = extractLabel(item).trim();
                     if (!raw) return;
                     const label = formatTitleLabel(raw);
-                    if (seen.has(label)) return;
-                    seen.add(label);
-                    labels.push(label);
-                });
+                    if (seenLabels.has(label)) return;
+                    seenLabels.add(label);
 
-                if (!labels.length) {
-                    hideSuggestions();
-                    return;
-                }
-                labels.forEach((label) => {
                     const el = document.createElement('div');
                     el.className = 'location-suggestion-item';
                     el.textContent = label;
@@ -797,35 +800,53 @@
                     });
                     suggestionsBox.appendChild(el);
                 });
-                suggestionsBox.style.display = 'block';
+
+                if (suggestionsBox.children.length) {
+                    suggestionsBox.style.display = 'block';
+                } else {
+                    hideSuggestions();
+                }
             }
 
-            async function searchTitles(query) {
-                if (abortController) {
-                    abortController.abort();
+            async function searchTitles(query, { loadMore } = {}) {
+                if (loadMore) {
+                    if (!hasMore || loadingMore) return;
+                    loadingMore = true;
+                } else {
+                    if (abortController) abortController.abort();
+                    currentQuery = query;
+                    nextStart = 0;
+                    hasMore = true;
+                    seenLabels = new Set();
+                    suggestionsBox.innerHTML = '';
                 }
+
                 abortController = new AbortController();
                 const requestId = ++latestRequestId;
                 spinner.classList.add('active');
 
                 try {
                     const response = await axios.get(TITLES_API_BASE_URL + '/getTitles', {
-                        params: { start: 0, offset: 20, searchKey: query },
+                        params: { start: nextStart, offset: PAGE_SIZE, searchKey: currentQuery },
                         signal: abortController.signal,
                         timeout: 6000
                     });
                     if (requestId !== latestRequestId) return;
                     const data = response.data || {};
                     const list = data.result || data.data || data.titles || (Array.isArray(data) ? data : []);
-                    renderSuggestions(Array.isArray(list) ? list : []);
+                    const items = Array.isArray(list) ? list : [];
+                    hasMore = items.length >= PAGE_SIZE;
+                    nextStart += items.length;
+                    appendSuggestions(items);
                 } catch (err) {
-                    if (requestId === latestRequestId && !axios.isCancel(err)) {
+                    if (requestId === latestRequestId && !axios.isCancel(err) && !loadMore) {
                         hideSuggestions();
                     }
                 } finally {
                     if (requestId === latestRequestId) {
                         spinner.classList.remove('active');
                     }
+                    loadingMore = false;
                 }
             }
 
@@ -836,6 +857,14 @@
             searchInput.addEventListener('input', () => {
                 clearTimeout(debounceTimer);
                 debounceTimer = setTimeout(() => searchTitles(searchInput.value.trim()), 250);
+            });
+
+            // Load next page when scrolled near the bottom of the dropdown.
+            suggestionsBox.addEventListener('scroll', () => {
+                const nearBottom = suggestionsBox.scrollTop + suggestionsBox.clientHeight >= suggestionsBox.scrollHeight - 40;
+                if (nearBottom) {
+                    searchTitles(currentQuery, { loadMore: true });
+                }
             });
 
             document.addEventListener('click', (e) => {
@@ -1335,18 +1364,22 @@
         function buildStep2FormData() {
             const storedPhone = localStorage.getItem('privePhoneNumber') || '';
 
+            const companyDetails = {
+                companyName: formVal('companyName'),
+                designation: formVal('designation').toLowerCase(),
+                companyLocation: [{ city: formVal('companyLocation'), state: formVal('companyState'), country: formVal('companyCountry') }],
+                organizationURL: formVal('websiteUrl'),
+                natureOfBusiness: formActiveToggleLabels('[data-group-name="Nature of Business"]').join(', '),
+                companyType: formActiveToggleLabels('[data-group-name="Type of Company"]').join(', ')
+            };
+            // Optional field — backend rejects an empty string, so only send it when filled.
+            const gstNumber = formVal('gstNumber');
+            if (gstNumber) companyDetails.GSTNumber = gstNumber;
+
             const payload = {
                 phone: '+91' + storedPhone.replace(/\D/g, '').slice(-10),
                 organizationURL: formVal('websiteUrl'),
-                companyDetails: {
-                    companyName: formVal('companyName'),
-                    designation: formVal('designation').toLowerCase(),
-                    companyLocation: [{ city: formVal('companyLocation'), state: formVal('companyState'), country: formVal('companyCountry') }],
-                    organizationURL: formVal('websiteUrl'),
-                    natureOfBusiness: formActiveToggleLabels('[data-group-name="Nature of Business"]').join(', '),
-                    companyType: formActiveToggleLabels('[data-group-name="Type of Company"]').join(', '),
-                    GSTNumber: formVal('gstNumber')
-                },
+                companyDetails: companyDetails,
                 currentPage: 'companyInformation'
             };
 
