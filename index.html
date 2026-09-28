@@ -610,17 +610,15 @@
             function selectLocation(props) {
                 searchInput.value = formatSuggestion(props);
                 hideSuggestions();
-                // Country/state-level picks (e.g. searching "India" itself) have no real
-                // city/state — leave those blank instead of duplicating the name into every
-                // field, which produced "India, India, India" on the next load.
-                const isCountry = props.type === 'country';
-                const isState = props.type === 'state';
                 config.onSelect({
-                    city: (isCountry || isState) ? '' : cleanCityName(props.city || props.name || ''),
-                    // Photon omits "state" for some city-level places (e.g. small towns) —
-                    // fall back through other admin-level fields so we never send an empty string.
-                    state: isCountry ? '' : (isState ? props.name : (props.state || props.county || props.state_district || props.region || '')),
-                    country: props.country || (isCountry ? props.name : '') || ''
+                    // Backend requires city/state/country as non-empty strings, so a
+                    // country/state-level pick (e.g. searching "Delhi" or "India" itself)
+                    // reuses the name where a finer field is missing — the search box and
+                    // prefill both dedupe the display text, so this never shows as
+                    // "India, India, India" even though the payload repeats the value.
+                    city: cleanCityName(props.city || props.name || ''),
+                    state: props.state || props.county || props.state_district || props.region || props.name || '',
+                    country: props.country || props.name || ''
                 });
             }
 
