@@ -610,12 +610,17 @@
             function selectLocation(props) {
                 searchInput.value = formatSuggestion(props);
                 hideSuggestions();
+                // Country/state-level picks (e.g. searching "India" itself) have no real
+                // city/state — leave those blank instead of duplicating the name into every
+                // field, which produced "India, India, India" on the next load.
+                const isCountry = props.type === 'country';
+                const isState = props.type === 'state';
                 config.onSelect({
-                    city: cleanCityName(props.city || props.name || ''),
-                    // Photon omits "state" for some places (e.g. city-states, small towns) —
+                    city: (isCountry || isState) ? '' : cleanCityName(props.city || props.name || ''),
+                    // Photon omits "state" for some city-level places (e.g. small towns) —
                     // fall back through other admin-level fields so we never send an empty string.
-                    state: props.state || props.county || props.state_district || props.region || props.city || props.name || '',
-                    country: props.country || ''
+                    state: isCountry ? '' : (isState ? props.name : (props.state || props.county || props.state_district || props.region || '')),
+                    country: props.country || (isCountry ? props.name : '') || ''
                 });
             }
 
@@ -1056,7 +1061,7 @@
                 prefillInput('city', location.city);
                 prefillInput('state', location.state);
                 prefillInput('country', location.country);
-                prefillInput('locationSearch', [location.city, location.state, location.country].filter(Boolean).join(', '));
+                prefillInput('locationSearch', [...new Set([location.city, location.state, location.country].filter(Boolean))].join(', '));
                 prefillInput('pin', location.pincode);
 
                 if (user.dpURL) {
@@ -1107,7 +1112,7 @@
                     prefillInput('companyLocation', compLoc.city);
                     prefillInput('companyState', compLoc.state);
                     prefillInput('companyCountry', compLoc.country);
-                    prefillInput('companyLocationSearch', [compLoc.city, compLoc.state, compLoc.country].filter(Boolean).join(', '));
+                    prefillInput('companyLocationSearch', [...new Set([compLoc.city, compLoc.state, compLoc.country].filter(Boolean))].join(', '));
                 }
                 if (company.organizationURL) {
                     const site = Array.isArray(company.organizationURL) ? company.organizationURL[0] : company.organizationURL;
@@ -1124,7 +1129,7 @@
                     prefillInput('channelPartnerLocation', collabLoc.city);
                     prefillInput('channelPartnerLocationState', collabLoc.state);
                     prefillInput('channelPartnerLocationCountry', collabLoc.country);
-                    prefillInput('channelPartnerLocationSearch', [collabLoc.city, collabLoc.state, collabLoc.country].filter(Boolean).join(', '));
+                    prefillInput('channelPartnerLocationSearch', [...new Set([collabLoc.city, collabLoc.state, collabLoc.country].filter(Boolean))].join(', '));
                 }
                 prefillInput('channelPartnerNote', collab.collaborationNotes);
 
@@ -1144,7 +1149,7 @@
                         prefillInput('manufacturingLocation', mfgLoc.city);
                         prefillInput('manufacturingLocationState', mfgLoc.state);
                         prefillInput('manufacturingLocationCountry', mfgLoc.country);
-                        prefillInput('manufacturingLocationSearch', [mfgLoc.city, mfgLoc.state, mfgLoc.country].filter(Boolean).join(', '));
+                        prefillInput('manufacturingLocationSearch', [...new Set([mfgLoc.city, mfgLoc.state, mfgLoc.country].filter(Boolean))].join(', '));
                     }
                     prefillCheckbox('#product-tab input[type="checkbox"]#warehouse', productTypes.has('warehouse'));
                     prefillCheckbox('#product-tab input[type="checkbox"]#retail', productTypes.has('retail'));
