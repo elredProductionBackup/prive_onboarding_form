@@ -2212,6 +2212,26 @@
                 return false;
             }
 
+            if (stepNumber === 3) {
+                const pairs = [
+                    { checkbox: '#product-tab input[type="checkbox"]#skills', input: '#product-tab input[type="text"]#skills', label: 'Skills' },
+                    { checkbox: '#product-tab input[type="checkbox"]#manufacturing', input: '#manufacturingLocationSearch', label: 'Manufacturing location' },
+                    { checkbox: '#product-tab input[type="checkbox"]#team', input: '#employees', label: 'Number of full time employees' },
+                    { checkbox: '#services-tab input[type="checkbox"]#skills2', input: '#services-tab input[type="text"]#skills2', label: 'Skills' },
+                    { checkbox: '#services-tab input[type="checkbox"]#team-services', input: '#employees-services', label: 'Number of full time employees' }
+                ];
+                for (const pair of pairs) {
+                    const checkbox = document.querySelector(pair.checkbox);
+                    const input = document.querySelector(pair.input);
+                    if (checkbox && checkbox.checked && input && !input.value.trim()) {
+                        showToast('Please fill "' + pair.label + '" or uncheck it.');
+                        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        input.focus();
+                        return false;
+                    }
+                }
+            }
+
             return true;
         }
 
