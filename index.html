@@ -892,9 +892,15 @@
             const searchInput = document.getElementById(config.inputId);
             const suggestionsBox = document.getElementById(config.suggestionsId);
             const spinner = document.getElementById(config.spinnerId);
+            const PAGE_SIZE = 10;
             let debounceTimer = null;
             let abortController = null;
             let latestRequestId = 0;
+            let currentQuery = '';
+            let nextStart = 1;
+            let hasMore = true;
+            let loadingMore = false;
+            let seenLabels = new Set();
 
             function hideSuggestions() {
                 suggestionsBox.style.display = 'none';
@@ -911,60 +917,67 @@
                 hideSuggestions();
             }
 
-            function renderSuggestions(items) {
-                suggestionsBox.innerHTML = '';
-
-                const seen = new Set();
-                const labels = [];
+            function appendSuggestions(items) {
                 items.forEach((item) => {
                     const raw = extractLabel(item).trim();
                     if (!raw) return;
                     const label = formatTitleLabel(raw);
-                    if (seen.has(label)) return;
-                    seen.add(label);
-                    labels.push(label);
-                });
+                    if (seenLabels.has(label)) return;
+                    seenLabels.add(label);
 
-                if (!labels.length) {
-                    hideSuggestions();
-                    return;
-                }
-                labels.forEach((label) => {
                     const el = document.createElement('div');
                     el.className = 'location-suggestion-item';
                     el.textContent = label;
                     el.addEventListener('click', () => selectIndustry(label));
                     suggestionsBox.appendChild(el);
                 });
-                suggestionsBox.style.display = 'block';
+
+                if (suggestionsBox.children.length) {
+                    suggestionsBox.style.display = 'block';
+                } else {
+                    hideSuggestions();
+                }
             }
 
-            async function searchIndustries(query) {
-                if (abortController) {
-                    abortController.abort();
+            async function searchIndustries(query, { loadMore } = {}) {
+                if (loadMore) {
+                    if (!hasMore || loadingMore) return;
+                    loadingMore = true;
+                } else {
+                    if (abortController) abortController.abort();
+                    currentQuery = query;
+                    nextStart = 1;
+                    hasMore = true;
+                    seenLabels = new Set();
+                    suggestionsBox.innerHTML = '';
                 }
+
                 abortController = new AbortController();
                 const requestId = ++latestRequestId;
                 spinner.classList.add('active');
 
                 try {
                     const response = await axios.get(window.ENV.API_BASE_URL + '/getGamificationIndustries', {
-                        params: { start: 1, offset: 10, searchKey: query },
+                        params: { start: nextStart, offset: PAGE_SIZE, searchKey: currentQuery },
                         signal: abortController.signal,
                         timeout: 6000
                     });
                     if (requestId !== latestRequestId) return;
                     const data = response.data || {};
                     const list = data.result || data.data || data.industries || (Array.isArray(data) ? data : []);
-                    renderSuggestions(Array.isArray(list) ? list : []);
+                    const items = Array.isArray(list) ? list : [];
+                    hasMore = items.length >= PAGE_SIZE;
+                    nextStart += items.length;
+                    appendSuggestions(items);
                 } catch (err) {
-                    if (requestId === latestRequestId && !axios.isCancel(err)) {
+                    if (requestId === latestRequestId && !axios.isCancel(err) && !loadMore) {
                         hideSuggestions();
                     }
                 } finally {
                     if (requestId === latestRequestId) {
                         spinner.classList.remove('active');
                     }
+                    loadingMore = false;
                 }
             }
 
@@ -975,6 +988,14 @@
             searchInput.addEventListener('input', () => {
                 clearTimeout(debounceTimer);
                 debounceTimer = setTimeout(() => searchIndustries(searchInput.value.trim()), 250);
+            });
+
+            // Load next page when scrolled near the bottom of the dropdown.
+            suggestionsBox.addEventListener('scroll', () => {
+                const nearBottom = suggestionsBox.scrollTop + suggestionsBox.clientHeight >= suggestionsBox.scrollHeight - 40;
+                if (nearBottom) {
+                    searchIndustries(currentQuery, { loadMore: true });
+                }
             });
 
             document.addEventListener('click', (e) => {
@@ -2224,7 +2245,7 @@
                     const checkbox = document.querySelector(pair.checkbox);
                     const input = document.querySelector(pair.input);
                     if (checkbox && checkbox.checked && input && !input.value.trim()) {
-                        showToast('Please fill "' + pair.label + '" or uncheck it.');
+                        showToast('Please fill "' + pair.label + '".');
                         input.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         input.focus();
                         return false;
