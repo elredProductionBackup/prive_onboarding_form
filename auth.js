@@ -38,20 +38,33 @@ if (typeof axios !== 'undefined') {
 
 // Catches expired/invalid JWT errors on any authenticated request. Shows the
 // "Session Expired" modal if the page has one (index.html); otherwise logs out directly.
+function triggerSessionExpired() {
+    const modal = document.getElementById('sessionExpiredModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    } else {
+        logout();
+    }
+}
+
 if (typeof axios !== 'undefined') {
     axios.interceptors.response.use(
-        (response) => response,
+        (response) => {
+            // Some endpoints return HTTP 200 with an errorCode in the body for an expired/invalid JWT.
+            const errorCode = response.data && response.data.errorCode;
+            if (errorCode === 1 || errorCode === -1) {
+                triggerSessionExpired();
+            }
+            return response;
+        },
         (error) => {
             const status = error.response && error.response.status;
-            const msg = ((error.response && error.response.data && error.response.data.message) || '').toLowerCase();
-            const isJwtError = status === 401 || msg.includes('jwt') || msg.includes('token');
+            const data = (error.response && error.response.data) || {};
+            const msg = (data.message || '').toLowerCase();
+            const errorCode = data.errorCode;
+            const isJwtError = status === 401 || msg.includes('jwt') || msg.includes('token') || errorCode === 1 || errorCode === -1;
             if (isJwtError) {
-                const modal = document.getElementById('sessionExpiredModal');
-                if (modal) {
-                    modal.style.display = 'flex';
-                } else {
-                    logout();
-                }
+                triggerSessionExpired();
             }
             return Promise.reject(error);
         }
