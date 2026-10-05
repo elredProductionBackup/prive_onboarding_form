@@ -233,10 +233,10 @@
                     </div>
                 </div>
 
-                <h3 class="form-title">Identity Proof</h3>
+                <h3 class="form-title">Identity Proof (Optional)</h3>
                 <p class="form-subtitle">Kindly share your identity proof such as aadhar, passport, driving license</p>
 
-                <div class="form-group required-group" data-group-name="Identity Proof" data-check="files">
+                <div class="form-group" data-group-name="Identity Proof" data-check="files">
                     <div class="file-upload single-upload" onclick="triggerFileUpload(this)"
                         ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
                         ondrop="handleFileDrop(event, this)">
@@ -340,7 +340,8 @@
                 </div>
 
                 <div class="button-group">
-                    <button class="btn-secondary" onclick="goToStep(1)">← Back</button>
+                    <button class="btn-secondary btn-icon" onclick="goToStep(1)"><i class="material-icons"
+                            style="font-size: 18px;">arrow_back</i> Back</button>
                     <button class="btn-primary" onclick="handleSaveAndContinue(2, 3, this)">Save &amp; Continue</button>
                 </div>
             </div>
@@ -395,7 +396,7 @@
                 <div class="form-group">
                     <label>What are you looking in a partner?</label>
 
-                    <div style="display: flex; align-items: baseline; gap: 15px; margin: 20px 0;">
+                    <div class="partner-should-have-row" style="display: flex; align-items: baseline; gap: 15px; margin: 20px 0;">
                         <span style="font-weight: 500; color: #333333; font-size: 13px;">The partner should have</span>
                         <!-- Tabs Toggle -->
                         <div class="tab-toggle">
@@ -413,7 +414,7 @@
                                     <i class="material-icons">check_box</i>
                                 </span>
                                 <label for="skills" id="skills_label" style="margin: 0; font-weight: 500;">Skills</label>
-                                <input type="text" id="skills" name="skills-nofill" placeholder="Type your skills"
+                                <input type="text" id="skills" name="skills-nofill" placeholder="The skills your partner/their team should have"
                                     pattern="^[^0-9]+$" title="Skills cannot contain numbers" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false"
                                     style="flex: 1; padding: 8px 12px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px;">
                             </div>
@@ -479,7 +480,7 @@
                                     <i class="material-icons">check_box</i>
                                 </span>
                                 <label for="skills" id="skills_label" style="margin: 0; font-weight: 500;">Skills</label>
-                                <input type="text" id="skills2" name="skills2-nofill" placeholder="Type your skills"
+                                <input type="text" id="skills2" name="skills2-nofill" placeholder="The skills your partner/their team should have"
                                     pattern="^[^0-9]+$" title="Skills cannot contain numbers" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false"
                                     style="flex: 1; padding: 8px 12px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px;">
                             </div>
@@ -509,7 +510,8 @@
 
 
                 <div class="button-group">
-                    <button class="btn-secondary" onclick="goToStep(2)">← Back</button>
+                    <button class="btn-secondary btn-icon" onclick="goToStep(2)"><i class="material-icons"
+                            style="font-size: 18px;">arrow_back</i> Back</button>
                     <button class="btn-primary btn-icon" onclick="handleSaveAndContinue(3, 4, this)">Save &amp; Continue <i class="material-icons"
                             style="font-size: 18px;">arrow_forward</i></button>
                 </div>
@@ -532,11 +534,12 @@
                     <label>I would value an introduction from a Privé member to</label>
                     <textarea id="problemStatement" required autocomplete="off"
                         style="width: 100%; padding: 12px 14px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; color: #333333; resize: vertical; min-height: 100px;"
-                        placeholder="Share your problem"></textarea>
+                        placeholder="Please introduce me to"></textarea>
                 </div>
 
                 <div class="step4-button-row">
-                    <button class="btn-secondary" onclick="goToStep(3)">← Back</button>
+                    <button class="btn-secondary btn-icon" onclick="goToStep(3)"><i class="material-icons"
+                            style="font-size: 18px;">arrow_back</i> Back</button>
                     <button class="btn-primary step4-submit-btn" id="submitApplicationBtn" onclick="handleSaveAndSubmit(this)">Submit Application</button>
                 </div>
             </div>
@@ -1091,7 +1094,7 @@
                 // security), so mark the group as already satisfied and show what's on file instead.
                 if (Array.isArray(user.documents) && user.documents.length > 0) {
                     const doc = user.documents[0];
-                    const group = document.querySelector('.required-group[data-check="files"]');
+                    const group = document.querySelector('[data-group-name="Identity Proof"][data-check="files"]');
                     if (group) {
                         group.dataset.hasExistingFile = 'true';
                         clearGroupError(group);

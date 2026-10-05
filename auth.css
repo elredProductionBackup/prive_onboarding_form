@@ -34,7 +34,7 @@ body {
     font-family: 'Lora', serif;
     font-size: 22px;
     color: #333333;
-    margin-bottom: 8px;
+    margin-bottom: 18px;
 }
 
 .auth-subtagline {
@@ -135,7 +135,7 @@ select.auth-input {
 /* OTP boxes */
 .otp-row {
     display: flex;
-    gap: 12px;
+    gap: 4px;
     justify-content: space-between;
 }
 

@@ -1191,10 +1191,19 @@ select.error {
 
     .checkbox-item {
         margin-left: 0;
+        flex-wrap: wrap;
+    }
+
+    .checkbox-item > input[type="text"],
+    .checkbox-item > input[type="number"],
+    .checkbox-item > .location-search-group {
+        flex: 1 1 100% !important;
+        width: calc(100% - 26px);
+        margin-left: 26px;
     }
 
     .employees-label {
-        margin-left: 10px !important;
+        margin-left: 38px !important;
     }
 
     .logo {
@@ -1247,6 +1256,20 @@ select.error {
 
     #product-tab, #services-tab {
         margin-left: 0;
+    }
+
+    .partner-should-have-row {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 10px !important;
+    }
+
+    .tab-toggle {
+        width: 100%;
+    }
+
+    .tab-toggle .tab-btn {
+        flex: 1;
     }
 }
 

@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Privé - OTP Verification</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:wght@400;500&display=swap"
+        rel="stylesheet">
     <style>
         @font-face {
             font-family: 'Mencken Std';
@@ -17,11 +19,12 @@
     <script src="https://cdn.jsdelivr.net/npm/axios@1/dist/axios.min.js"></script>
     <script src="env.js"></script>
 </head>
+
 <body>
     <div class="auth-page">
         <img src="logo.svg" alt="Privé" class="auth-logo-img">
-        <p class="auth-tagline">A network of extraordinary minds.</p>
-        <p class="auth-subtagline">Built on trust. Driven by impact.</p>
+        <p class="auth-tagline">Privé is an enterprise network designed to elevate good teams into great ones.</p>
+        <!-- <p class="auth-subtagline">Built on trust. Driven by impact.</p> -->
 
         <div class="auth-card">
             <h1 class="auth-card-title">OTP Verification</h1>
@@ -31,7 +34,8 @@
                 <div class="auth-form-group">
                     <label>Enter OTP</label>
                     <div class="otp-row">
-                        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" autocomplete="one-time-code">
+                        <input type="text" class="otp-box" maxlength="1" inputmode="numeric"
+                            autocomplete="one-time-code">
                         <input type="text" class="otp-box" maxlength="1" inputmode="numeric" autocomplete="off">
                         <input type="text" class="otp-box" maxlength="1" inputmode="numeric" autocomplete="off">
                         <input type="text" class="otp-box" maxlength="1" inputmode="numeric" autocomplete="off">
@@ -41,7 +45,8 @@
                     <p class="auth-error-text" id="otpError">Incorrect OTP. Please try again.</p>
                     <div class="otp-timer">
                         <span id="timerText">Time Remaining: 01:00</span>
-                        <button type="button" class="otp-resend" id="resendBtn" style="display:none;">Resend OTP</button>
+                        <button type="button" class="otp-resend" id="resendBtn" style="display:none;">Resend
+                            OTP</button>
                     </div>
                 </div>
 
@@ -235,4 +240,5 @@
         });
     </script>
 </body>
+
 </html>
