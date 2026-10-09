@@ -1629,6 +1629,11 @@
             });
         }
 
+        // Stop mouse-wheel scroll from silently changing a focused number input's value.
+        document.querySelectorAll('input[type="number"]').forEach(el => {
+            el.addEventListener('wheel', () => el.blur(), { passive: true });
+        });
+
         // Material Icons Checkbox Toggle
         document.querySelectorAll('.material-checkbox').forEach(checkbox => {
             const icon = checkbox.nextElementSibling;

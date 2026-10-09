@@ -47,21 +47,12 @@ function triggerSessionExpired() {
     }
 }
 
-// errorCode 1/-1 alone is NOT jwt-specific — the backend reuses those codes for
-// unrelated failures (e.g. username taken, validation errors), so checking errorCode
-// alone fired the "Session Expired" modal randomly on any such error. Require the
-// message to actually mention the token/session/auth being invalid.
-function isJwtAuthMessage(msg) {
-    return /\b(jwt|token|session|unauthori[sz]ed)\b/.test(msg) && /(expired|invalid|revoked)/.test(msg);
-}
-
 if (typeof axios !== 'undefined') {
     axios.interceptors.response.use(
         (response) => {
             const data = response.data || {};
             const errorCode = data.errorCode;
-            const msg = (data.message || '').toLowerCase();
-            if ((errorCode === 1 || errorCode === -1) && isJwtAuthMessage(msg)) {
+            if (errorCode === 1 || errorCode === -1) {
                 triggerSessionExpired();
             }
             return response;
@@ -69,9 +60,8 @@ if (typeof axios !== 'undefined') {
         (error) => {
             const status = error.response && error.response.status;
             const data = (error.response && error.response.data) || {};
-            const msg = (data.message || '').toLowerCase();
             const errorCode = data.errorCode;
-            const isJwtError = status === 401 || ((errorCode === 1 || errorCode === -1) && isJwtAuthMessage(msg));
+            const isJwtError = status === 401 || errorCode === 1 || errorCode === -1;
             if (isJwtError) {
                 triggerSessionExpired();
             }
