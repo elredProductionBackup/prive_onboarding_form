@@ -609,6 +609,7 @@
 
             function selectLocation(props) {
                 searchInput.value = formatSuggestion(props);
+                searchInput.classList.remove('error');
                 hideSuggestions();
                 config.onSelect({
                     // Backend requires city/state/country as non-empty strings, so a
@@ -681,6 +682,14 @@
             }
 
             searchInput.addEventListener('input', () => {
+                // Typing invalidates whatever was picked before — clear the red outline and
+                // the stale hidden city/state/country so validateStep re-checks fresh.
+                searchInput.classList.remove('error');
+                const cityField = config.cityFieldId ? document.getElementById(config.cityFieldId) : null;
+                if (cityField && cityField.value) {
+                    if (config.onSelect) config.onSelect({ city: '', state: '', country: '' });
+                }
+
                 clearTimeout(debounceTimer);
                 const query = searchInput.value.trim();
                 if (query.length < 3) {
@@ -695,24 +704,19 @@
                 debounceTimer = setTimeout(() => searchLocation(query), 250);
             });
 
+            // Re-show the dropdown on focus so a rejected ("please select from the list")
+            // value can be picked properly instead of staying stuck.
+            searchInput.addEventListener('focus', () => {
+                const query = searchInput.value.trim();
+                if (query.length >= 3) {
+                    searchLocation(query);
+                }
+            });
+
             document.addEventListener('click', (e) => {
                 if (e.target !== searchInput && !suggestionsBox.contains(e.target)) {
                     hideSuggestions();
                 }
-            });
-
-            // Typed free text without picking a suggestion leaves the hidden city/state/
-            // country empty (or stale from a prior pick) — backend then rejects it as
-            // "invalid string". Clear the box on blur unless a real selection backs it.
-            searchInput.addEventListener('blur', () => {
-                setTimeout(() => {
-                    const cityField = config.cityFieldId ? document.getElementById(config.cityFieldId) : null;
-                    const hasValidSelection = cityField && cityField.value.trim();
-                    if (searchInput.value.trim() && !hasValidSelection) {
-                        searchInput.value = '';
-                        if (config.onSelect) config.onSelect({ city: '', state: '', country: '' });
-                    }
-                }, 150); // let a suggestion click's own handler run first — it blurs the input too
             });
         }
 
@@ -2291,11 +2295,13 @@
                 }
                 const cityEl = document.getElementById(lp.city);
                 if (searchEl.value.trim() && !(cityEl && cityEl.value.trim())) {
-                    showToast('Please select "' + lp.label + '" from the suggestions list.');
+                    searchEl.classList.add('error');
+                    showToast('Please select the location from the dropdown.');
                     searchEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     searchEl.focus();
                     return false;
                 }
+                searchEl.classList.remove('error');
             }
 
             return true;
