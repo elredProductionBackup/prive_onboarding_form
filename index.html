@@ -387,7 +387,7 @@
 
                 <div class="form-group">
                     <label>Briefly describe the partnerships you are open to exploring</label>
-                    <textarea id="channelPartnerNote" autocomplete="off"
+                    <textarea id="channelPartnerNote" required autocomplete="off"
                         style="width: 100%; padding: 12px 14px; border: 1px solid #DEDEDE; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; color: #333333; resize: vertical; min-height: 60px;"
                         placeholder="Short note"></textarea>
                 </div>
@@ -700,12 +700,27 @@
                     hideSuggestions();
                 }
             });
+
+            // Typed free text without picking a suggestion leaves the hidden city/state/
+            // country empty (or stale from a prior pick) — backend then rejects it as
+            // "invalid string". Clear the box on blur unless a real selection backs it.
+            searchInput.addEventListener('blur', () => {
+                setTimeout(() => {
+                    const cityField = config.cityFieldId ? document.getElementById(config.cityFieldId) : null;
+                    const hasValidSelection = cityField && cityField.value.trim();
+                    if (searchInput.value.trim() && !hasValidSelection) {
+                        searchInput.value = '';
+                        if (config.onSelect) config.onSelect({ city: '', state: '', country: '' });
+                    }
+                }, 150); // let a suggestion click's own handler run first — it blurs the input too
+            });
         }
 
         setupLocationSearch({
             inputId: 'locationSearch',
             suggestionsId: 'locationSuggestions',
             spinnerId: 'locationSpinner',
+            cityFieldId: 'city',
             onSelect: (loc) => {
                 document.getElementById('city').value = loc.city;
                 document.getElementById('state').value = loc.state;
@@ -717,6 +732,7 @@
             inputId: 'companyLocationSearch',
             suggestionsId: 'companyLocationSuggestions',
             spinnerId: 'companyLocationSpinner',
+            cityFieldId: 'companyLocation',
             onSelect: (loc) => {
                 document.getElementById('companyLocation').value = loc.city;
                 document.getElementById('companyState').value = loc.state;
@@ -728,6 +744,7 @@
             inputId: 'channelPartnerLocationSearch',
             suggestionsId: 'channelPartnerLocationSuggestions',
             spinnerId: 'channelPartnerLocationSpinner',
+            cityFieldId: 'channelPartnerLocation',
             onSelect: (loc) => {
                 document.getElementById('channelPartnerLocation').value = loc.city;
                 document.getElementById('channelPartnerLocationState').value = loc.state;
@@ -739,6 +756,7 @@
             inputId: 'manufacturingLocationSearch',
             suggestionsId: 'manufacturingLocationSuggestions',
             spinnerId: 'manufacturingLocationSpinner',
+            cityFieldId: 'manufacturingLocation',
             onSelect: (loc) => {
                 document.getElementById('manufacturingLocation').value = loc.city;
                 document.getElementById('manufacturingLocationState').value = loc.state;
@@ -2253,6 +2271,30 @@
                         input.focus();
                         return false;
                     }
+                }
+            }
+
+            // Typed location text that was never picked from the suggestions list leaves
+            // the hidden city field empty — backend then rejects it as "invalid string".
+            const locationPairs = [
+                { search: 'locationSearch', city: 'city', label: 'Location' },
+                { search: 'companyLocationSearch', city: 'companyLocation', label: 'Company Location' },
+                { search: 'channelPartnerLocationSearch', city: 'channelPartnerLocation', label: 'Location where you are open for Distributors / Channel Partners' },
+                { search: 'manufacturingLocationSearch', city: 'manufacturingLocation', label: 'Manufacturing location', checkbox: '#product-tab input[type="checkbox"]#manufacturing' }
+            ];
+            for (const lp of locationPairs) {
+                const searchEl = section.querySelector('#' + lp.search);
+                if (!searchEl) continue;
+                if (lp.checkbox) {
+                    const checkbox = document.querySelector(lp.checkbox);
+                    if (!checkbox || !checkbox.checked) continue;
+                }
+                const cityEl = document.getElementById(lp.city);
+                if (searchEl.value.trim() && !(cityEl && cityEl.value.trim())) {
+                    showToast('Please select "' + lp.label + '" from the suggestions list.');
+                    searchEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    searchEl.focus();
+                    return false;
                 }
             }
 
