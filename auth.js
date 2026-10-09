@@ -144,6 +144,8 @@ function getApiErrorMessage(error, fallback) {
 }
 
 // Shows a transient toast notification. type: 'error' | 'success'
+// Only one toast is ever shown at a time — a rapid double-click or an overlapping
+// retry would otherwise stack several identical toasts on screen.
 function showToast(message, type) {
     type = type || 'error';
     let container = document.getElementById('toastContainer');
@@ -153,6 +155,8 @@ function showToast(message, type) {
         container.className = 'toast-container';
         document.body.appendChild(container);
     }
+    container.querySelectorAll('.toast').forEach((t) => t.remove());
+
     const toast = document.createElement('div');
     toast.className = 'toast toast-' + type;
     toast.textContent = message;
@@ -162,4 +166,19 @@ function showToast(message, type) {
         toast.classList.remove('show');
         setTimeout(() => toast.remove(), 300);
     }, 3500);
+}
+
+// Rate-limits a button's click handler — ignores a click if the same key fired
+// within `cooldownMs`, even faster than the handler's own `disabled = true` can land
+// (e.g. a double-tap on mobile, or an Enter-key submit racing a button click).
+const _rateLimitLastCall = {};
+function rateLimited(key, cooldownMs, fn) {
+    return function (...args) {
+        const now = Date.now();
+        if (now - (_rateLimitLastCall[key] || 0) < cooldownMs) {
+            return;
+        }
+        _rateLimitLastCall[key] = now;
+        return fn.apply(this, args);
+    };
 }

@@ -170,7 +170,7 @@
 
         startTimer();
 
-        resendBtn.addEventListener('click', async () => {
+        resendBtn.addEventListener('click', rateLimited('otpResend', 1500, async () => {
             resendBtn.disabled = true;
             try {
                 const response = await axios.post(window.ENV.API_BASE_URL + '/sendPhoneNumberOTP', {
@@ -196,13 +196,13 @@
             } finally {
                 resendBtn.disabled = false;
             }
-        });
+        }));
 
         // ---------- Verify ----------
         const otpSubmitBtn = document.getElementById('otpSubmitBtn');
         const otpSubmitText = document.getElementById('otpSubmitText');
 
-        document.getElementById('otpForm').addEventListener('submit', async (e) => {
+        document.getElementById('otpForm').addEventListener('submit', rateLimited('otpVerify', 1000, async (e) => {
             e.preventDefault();
             const entered = otpBoxes.map(box => box.value).join('');
             if (entered.length < 6) {
@@ -237,7 +237,7 @@
                 otpSubmitBtn.disabled = false;
                 otpSubmitText.textContent = 'Verify';
             }
-        });
+        }));
     </script>
 </body>
 

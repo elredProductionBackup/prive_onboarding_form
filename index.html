@@ -240,7 +240,7 @@
                     <div class="file-upload single-upload" onclick="triggerFileUpload(this)"
                         ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
                         ondrop="handleFileDrop(event, this)">
-                        <input type="file" id="idProof" class="file-upload-input" accept="image/*,.pdf"
+                        <input type="file" id="idProof" class="file-upload-input" accept=".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx,image/jpeg,image/png,image/webp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                             style="display:none" onchange="handleFileSelect(this)">
                         <div class="upload-icon">
                             <i class="material-icons">file_upload</i>
@@ -1993,6 +1993,7 @@
                 applyEmailRejectionState();
             }
         }
+        sendEmailOtp = rateLimited('sendEmailOtp', 1000, sendEmailOtp);
 
         function editEmail() {
             stopEmailOtpTimer();
@@ -2083,6 +2084,7 @@
                 verifyBtn.textContent = originalLabel;
             }
         }
+        verifyEmailOtp = rateLimited('verifyEmailOtp', 1000, verifyEmailOtp);
 
         // ---------- Profile image upload ----------
         function triggerAvatarUpload() {

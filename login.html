@@ -68,7 +68,7 @@
         const loginSubmitBtn = document.getElementById('loginSubmitBtn');
         const loginSubmitText = document.getElementById('loginSubmitText');
 
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        document.getElementById('loginForm').addEventListener('submit', rateLimited('loginSendOtp', 1500, async (e) => {
             e.preventDefault();
             const mobile = mobileInput.value.trim();
             if (!/^\d{10}$/.test(mobile)) {
@@ -100,7 +100,7 @@
                 loginSubmitBtn.disabled = false;
                 loginSubmitText.textContent = 'Verify with OTP';
             }
-        });
+        }));
     </script>
 </body>
 
