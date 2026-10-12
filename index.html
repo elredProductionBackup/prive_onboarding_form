@@ -557,6 +557,17 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="submitSuccessModal" style="display:none;">
+        <div class="modal-card">
+            <div class="modal-icon-wrap">
+                <i class="material-icons">check_circle</i>
+            </div>
+            <h2 class="modal-title">Submitted</h2>
+            <p class="modal-subtitle">Your form has been successfully submitted!</p>
+            <button class="btn-primary modal-close-btn" onclick="handleSubmitSuccessOk()">OK</button>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="sessionExpiredModal" style="display:none;">
         <div class="modal-card">
             <div class="modal-icon-wrap">
@@ -1227,14 +1238,18 @@
         let applicationSubmitted = false;
 
         function showAlreadySubmittedModal() {
-            document.getElementById('alreadySubmittedModal').style.display = 'flex';
+            showModal('alreadySubmittedModal');
         }
 
         function closeAlreadySubmittedModal() {
-            document.getElementById('alreadySubmittedModal').style.display = 'none';
+            hideModal('alreadySubmittedModal');
         }
 
         function handleSessionExpiredOk() {
+            logout();
+        }
+
+        function handleSubmitSuccessOk() {
             logout();
         }
 
@@ -1548,9 +1563,7 @@
                     throw new Error(data.message || 'Failed to submit application.');
                 }
                 submitBtn.textContent = 'Submitted';
-                showToast('Your form has been successfully submitted!', 'success');
-                // Application is complete — end the session so the user can't linger on the locked form.
-                setTimeout(logout, 1800);
+                showModal('submitSuccessModal');
             } catch (err) {
                 showToast(getApiErrorMessage(err, 'Failed to submit application. Please try again.'));
                 submitBtn.disabled = false;

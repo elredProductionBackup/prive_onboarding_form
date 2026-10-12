@@ -36,12 +36,23 @@ if (typeof axios !== 'undefined') {
     });
 }
 
+// Shared by every modal overlay — stops the page behind it from scrolling while open.
+function showModal(id) {
+    document.getElementById(id).style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function hideModal(id) {
+    document.getElementById(id).style.display = 'none';
+    document.body.style.overflow = '';
+}
+
 // Catches expired/invalid JWT errors on any authenticated request. Shows the
 // "Session Expired" modal if the page has one (index.html); otherwise logs out directly.
 function triggerSessionExpired() {
     const modal = document.getElementById('sessionExpiredModal');
     if (modal) {
-        modal.style.display = 'flex';
+        showModal('sessionExpiredModal');
     } else {
         logout();
     }
