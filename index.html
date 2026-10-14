@@ -887,6 +887,7 @@
             suggestionsId: 'companyLocationSuggestions',
             spinnerId: 'companyLocationSpinner',
             cityFieldId: 'companyLocation',
+            useGoogle: true,
             onSelect: (loc) => {
                 document.getElementById('companyLocation').value = loc.city;
                 document.getElementById('companyState').value = loc.state;
@@ -899,6 +900,7 @@
             suggestionsId: 'channelPartnerLocationSuggestions',
             spinnerId: 'channelPartnerLocationSpinner',
             cityFieldId: 'channelPartnerLocation',
+            useGoogle: true,
             onSelect: (loc) => {
                 document.getElementById('channelPartnerLocation').value = loc.city;
                 document.getElementById('channelPartnerLocationState').value = loc.state;
