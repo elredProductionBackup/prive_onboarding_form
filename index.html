@@ -136,8 +136,8 @@
                     <div class="form-group">
                         <label for="username">Username</label>
                         <input type="text" id="username" name="username-nofill" placeholder="Enter username" required minlength="3"
-                            maxlength="20" pattern="^[a-zA-Z0-9_]{3,20}$"
-                            title="3-20 characters: letters, numbers, underscore only" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false">
+                            maxlength="50" pattern="^\S{3,50}$"
+                            title="3-50 characters, no spaces" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false">
                         <p class="username-status" id="usernameStatus">Enter min. 3 characters</p>
                     </div>
                     <div class="form-group" id="emailFieldGroup">
@@ -210,6 +210,8 @@
                         <input type="hidden" id="city">
                         <input type="hidden" id="state">
                         <input type="hidden" id="country">
+                        <input type="hidden" id="locationLatitude">
+                        <input type="hidden" id="locationLongitude">
                     </div>
                     <div class="form-group">
                         <label for="pin">PIN / ZIP Code</label>
@@ -306,6 +308,8 @@
                         <input type="hidden" id="companyLocation">
                         <input type="hidden" id="companyState">
                         <input type="hidden" id="companyCountry">
+                        <input type="hidden" id="companyLatitude">
+                        <input type="hidden" id="companyLongitude">
                     </div>
                     <div class="form-group">
                         <label for="websiteUrl">Company's website URL</label>
@@ -382,6 +386,8 @@
                         <input type="hidden" id="channelPartnerLocation">
                         <input type="hidden" id="channelPartnerLocationState">
                         <input type="hidden" id="channelPartnerLocationCountry">
+                        <input type="hidden" id="channelPartnerLocationLatitude">
+                        <input type="hidden" id="channelPartnerLocationLongitude">
                     </div>
                 </div>
 
@@ -434,6 +440,8 @@
                                     <input type="hidden" id="manufacturingLocation">
                                     <input type="hidden" id="manufacturingLocationState">
                                     <input type="hidden" id="manufacturingLocationCountry">
+                                    <input type="hidden" id="manufacturingLocationLatitude">
+                                    <input type="hidden" id="manufacturingLocationLongitude">
                                 </div>
                             </div>
                             <div class="checkbox-item">
@@ -618,11 +626,14 @@
                 return parts.filter((v, i) => parts.indexOf(v) === i).join(', ');
             }
 
-            function selectLocation(props) {
+            function selectLocation(props, coords) {
                 searchInput.value = formatSuggestion(props);
                 searchInput.classList.remove('error');
                 hideSuggestions();
                 config.onSelect({
+                    // Photon (GeoJSON) gives coordinates as [lng, lat].
+                    latitude: coords ? String(coords[1]) : '',
+                    longitude: coords ? String(coords[0]) : '',
                     // Backend requires city/state/country as non-empty strings, so a
                     // country/state-level pick (e.g. searching "Delhi" or "India" itself)
                     // reuses the name where a finer field is missing — the search box and
@@ -644,18 +655,18 @@
                     const label = formatSuggestion(props);
                     if (seen.has(label)) return;
                     seen.add(label);
-                    deduped.push(props);
+                    deduped.push({ props, coords: feature.geometry && feature.geometry.coordinates });
                 });
 
                 if (!deduped.length) {
                     hideSuggestions();
                     return;
                 }
-                deduped.forEach((props) => {
+                deduped.forEach(({ props, coords }) => {
                     const item = document.createElement('div');
                     item.className = 'location-suggestion-item';
                     item.textContent = formatSuggestion(props);
-                    item.addEventListener('click', () => selectLocation(props));
+                    item.addEventListener('click', () => selectLocation(props, coords));
                     suggestionsBox.appendChild(item);
                 });
                 suggestionsBox.style.display = 'block';
@@ -712,9 +723,11 @@
                 let city = '';
                 let state = '';
                 let country = '';
+                let latitude = '';
+                let longitude = '';
                 try {
                     const place = prediction.toPlace();
-                    await place.fetchFields({ fields: ['addressComponents'] });
+                    await place.fetchFields({ fields: ['addressComponents', 'location'] });
                     const comp = (type) => {
                         const c = (place.addressComponents || []).find(a => a.types.includes(type));
                         return c ? c.longText : '';
@@ -722,6 +735,10 @@
                     country = comp('country');
                     state = comp('administrative_area_level_1') || country;
                     city = comp('locality') || comp('postal_town') || comp('administrative_area_level_2') || state;
+                    if (place.location) {
+                        latitude = String(place.location.lat());
+                        longitude = String(place.location.lng());
+                    }
                 } catch (err) {
                     // Details lookup failed — fall back to the label: "City, State, Country".
                     const parts = label.split(',').map(s => s.trim()).filter(Boolean);
@@ -730,7 +747,7 @@
                     state = parts.length > 2 ? parts[parts.length - 2] : country;
                 }
                 googleSessionToken = null;
-                config.onSelect({ city, state, country });
+                config.onSelect({ city, state, country, latitude, longitude });
             }
 
             async function searchLocation(query) {
@@ -825,7 +842,7 @@
                 searchInput.classList.remove('error');
                 const cityField = config.cityFieldId ? document.getElementById(config.cityFieldId) : null;
                 if (cityField && cityField.value) {
-                    if (config.onSelect) config.onSelect({ city: '', state: '', country: '' });
+                    if (config.onSelect) config.onSelect({ city: '', state: '', country: '', latitude: '', longitude: '' });
                 }
 
                 clearTimeout(debounceTimer);
@@ -879,6 +896,8 @@
                 document.getElementById('city').value = loc.city;
                 document.getElementById('state').value = loc.state;
                 document.getElementById('country').value = loc.country;
+                document.getElementById('locationLatitude').value = loc.latitude;
+                document.getElementById('locationLongitude').value = loc.longitude;
             }
         });
 
@@ -892,6 +911,8 @@
                 document.getElementById('companyLocation').value = loc.city;
                 document.getElementById('companyState').value = loc.state;
                 document.getElementById('companyCountry').value = loc.country;
+                document.getElementById('companyLatitude').value = loc.latitude;
+                document.getElementById('companyLongitude').value = loc.longitude;
             }
         });
 
@@ -905,6 +926,8 @@
                 document.getElementById('channelPartnerLocation').value = loc.city;
                 document.getElementById('channelPartnerLocationState').value = loc.state;
                 document.getElementById('channelPartnerLocationCountry').value = loc.country;
+                document.getElementById('channelPartnerLocationLatitude').value = loc.latitude;
+                document.getElementById('channelPartnerLocationLongitude').value = loc.longitude;
             }
         });
 
@@ -918,6 +941,8 @@
                 document.getElementById('manufacturingLocation').value = loc.city;
                 document.getElementById('manufacturingLocationState').value = loc.state;
                 document.getElementById('manufacturingLocationCountry').value = loc.country;
+                document.getElementById('manufacturingLocationLatitude').value = loc.latitude;
+                document.getElementById('manufacturingLocationLongitude').value = loc.longitude;
             }
         });
 
@@ -1255,6 +1280,8 @@
                 prefillInput('city', location.city);
                 prefillInput('state', location.state);
                 prefillInput('country', location.country);
+                prefillInput('locationLatitude', location.latitude);
+                prefillInput('locationLongitude', location.longitude);
                 prefillInput('locationSearch', [...new Set([location.city, location.state, location.country].filter(Boolean))].join(', '));
                 prefillInput('pin', location.pincode);
 
@@ -1306,6 +1333,8 @@
                     prefillInput('companyLocation', compLoc.city);
                     prefillInput('companyState', compLoc.state);
                     prefillInput('companyCountry', compLoc.country);
+                    prefillInput('companyLatitude', compLoc.latitude);
+                    prefillInput('companyLongitude', compLoc.longitude);
                     prefillInput('companyLocationSearch', [...new Set([compLoc.city, compLoc.state, compLoc.country].filter(Boolean))].join(', '));
                 }
                 if (company.organizationURL) {
@@ -1323,6 +1352,8 @@
                     prefillInput('channelPartnerLocation', collabLoc.city);
                     prefillInput('channelPartnerLocationState', collabLoc.state);
                     prefillInput('channelPartnerLocationCountry', collabLoc.country);
+                    prefillInput('channelPartnerLocationLatitude', collabLoc.latitude);
+                    prefillInput('channelPartnerLocationLongitude', collabLoc.longitude);
                     prefillInput('channelPartnerLocationSearch', [...new Set([collabLoc.city, collabLoc.state, collabLoc.country].filter(Boolean))].join(', '));
                 }
                 prefillInput('channelPartnerNote', collab.collaborationNotes);
@@ -1343,6 +1374,8 @@
                         prefillInput('manufacturingLocation', mfgLoc.city);
                         prefillInput('manufacturingLocationState', mfgLoc.state);
                         prefillInput('manufacturingLocationCountry', mfgLoc.country);
+                        prefillInput('manufacturingLocationLatitude', mfgLoc.latitude);
+                        prefillInput('manufacturingLocationLongitude', mfgLoc.longitude);
                         prefillInput('manufacturingLocationSearch', [...new Set([mfgLoc.city, mfgLoc.state, mfgLoc.country].filter(Boolean))].join(', '));
                     }
                     prefillCheckbox('#product-tab input[type="checkbox"]#warehouse', productTypes.has('warehouse'));
@@ -1562,6 +1595,8 @@
                 location: {
                     city: formVal('city'),
                     state: formVal('state'),
+                    latitude: formVal('locationLatitude'),
+                    longitude: formVal('locationLongitude'),
                     country: formVal('country'),
                     pincode: formVal('pin')
                 },
@@ -1583,7 +1618,7 @@
             const companyDetails = {
                 companyName: formVal('companyName'),
                 designation: formVal('designation').toLowerCase(),
-                companyLocation: [{ city: formVal('companyLocation'), state: formVal('companyState'), country: formVal('companyCountry') }],
+                companyLocation: [{ city: formVal('companyLocation'), state: formVal('companyState'), latitude: formVal('companyLatitude'), longitude: formVal('companyLongitude'), country: formVal('companyCountry') }],
                 organizationURL: formVal('websiteUrl'),
                 natureOfBusiness: formActiveToggleLabels('[data-group-name="Nature of Business"]').join(', '),
                 companyType: formActiveToggleLabels('[data-group-name="Type of Company"]').join(', ')
@@ -1617,7 +1652,7 @@
                 // Backend requires state as a non-empty string — Photon doesn't always return one
                 // (e.g. union territories, city-states), so fall back to city/country rather than "".
                 const mfgState = formVal('manufacturingLocationState') || mfgCity || mfgCountry;
-                productEntries.push({ type: 'manufacturing', location: { city: mfgCity, state: mfgState, country: mfgCountry } });
+                productEntries.push({ type: 'manufacturing', location: { city: mfgCity, state: mfgState, latitude: formVal('manufacturingLocationLatitude'), longitude: formVal('manufacturingLocationLongitude'), country: mfgCountry } });
             }
             if (formIsChecked('#product-tab input[type="checkbox"]#warehouse')) {
                 productEntries.push({ type: 'warehouse' });
@@ -1648,7 +1683,7 @@
 
             return {
                 collaborationIndustries: collaborationIndustries,
-                collaborationLocation: [{ city: formVal('channelPartnerLocation'), state: formVal('channelPartnerLocationState'), country: formVal('channelPartnerLocationCountry') }],
+                collaborationLocation: [{ city: formVal('channelPartnerLocation'), state: formVal('channelPartnerLocationState'), latitude: formVal('channelPartnerLocationLatitude'), longitude: formVal('channelPartnerLocationLongitude'), country: formVal('channelPartnerLocationCountry') }],
                 collaborationNotes: formVal('channelPartnerNote'),
                 partner: {
                     product: productEntries,
@@ -1844,7 +1879,7 @@
                 el.value = el.value.replace(regex, '');
             });
         }
-        restrictToPattern(document.getElementById('username'), /[^a-zA-Z0-9_]/g);
+        restrictToPattern(document.getElementById('username'), /\s/g);
 
         document.getElementById('email').addEventListener('input', function() {
             this.setCustomValidity('');
