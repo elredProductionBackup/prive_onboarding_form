@@ -179,7 +179,7 @@
                 <div class="form-row three-column">
                     <div class="form-group">
                         <label for="linkedin">Linkedin profile URL</label>
-                        <input type="text" id="linkedin" name="linkedin-nofill" placeholder="https://linkedin.com/in/username"
+                        <input type="text" id="linkedin" name="linkedin-nofill" placeholder="linkedin.com/in/username"
                             pattern=".*linkedin\.com\/.*"
                             title="Please enter a valid LinkedIn profile URL" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false">
                     </div>
@@ -913,6 +913,7 @@
             suggestionsId: 'manufacturingLocationSuggestions',
             spinnerId: 'manufacturingLocationSpinner',
             cityFieldId: 'manufacturingLocation',
+            useGoogle: true,
             onSelect: (loc) => {
                 document.getElementById('manufacturingLocation').value = loc.city;
                 document.getElementById('manufacturingLocationState').value = loc.state;

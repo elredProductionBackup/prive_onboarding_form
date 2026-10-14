@@ -50,6 +50,9 @@ function hideModal(id) {
 // Catches expired/invalid JWT errors on any authenticated request. Shows the
 // "Session Expired" modal if the page has one (index.html); otherwise logs out directly.
 function triggerSessionExpired() {
+    // No token = no session to expire (login/OTP pages). Logging out there just reloads
+    // the page and hides the API's real error, e.g. "Too many attempts".
+    if (!isAuthenticated()) return;
     const modal = document.getElementById('sessionExpiredModal');
     if (modal) {
         showModal('sessionExpiredModal');
@@ -58,24 +61,30 @@ function triggerSessionExpired() {
     }
 }
 
+// errorCode 110 = form already submitted: show the same "Submitted" popup as a fresh
+// submit (its OK button logs out). Only index.html has that popup.
+function triggerAlreadySubmitted() {
+    if (document.getElementById('submitSuccessModal')) {
+        showModal('submitSuccessModal');
+    }
+}
+
+function handleErrorCode(errorCode) {
+    if (errorCode === 1 || errorCode === -1) triggerSessionExpired();
+    if (errorCode === 110) triggerAlreadySubmitted();
+}
+
 if (typeof axios !== 'undefined') {
     axios.interceptors.response.use(
         (response) => {
-            const data = response.data || {};
-            const errorCode = data.errorCode;
-            if (errorCode === 1 || errorCode === -1) {
-                triggerSessionExpired();
-            }
+            handleErrorCode((response.data || {}).errorCode);
             return response;
         },
         (error) => {
             const status = error.response && error.response.status;
             const data = (error.response && error.response.data) || {};
-            const errorCode = data.errorCode;
-            const isJwtError = status === 401 || errorCode === 1 || errorCode === -1;
-            if (isJwtError) {
-                triggerSessionExpired();
-            }
+            if (status === 401) triggerSessionExpired();
+            handleErrorCode(data.errorCode);
             return Promise.reject(error);
         }
     );
@@ -187,6 +196,9 @@ function rateLimited(key, cooldownMs, fn) {
     return function (...args) {
         const now = Date.now();
         if (now - (_rateLimitLastCall[key] || 0) < cooldownMs) {
+            // A throttled form submit must still be cancelled, or the browser does a native
+            // submit — reloading the page with the field values (e.g. phone number) in the URL.
+            if (args[0] && typeof args[0].preventDefault === 'function') args[0].preventDefault();
             return;
         }
         _rateLimitLastCall[key] = now;
