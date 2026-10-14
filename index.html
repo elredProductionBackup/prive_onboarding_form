@@ -123,12 +123,12 @@
                     <div class="form-group">
                         <label for="firstName">First Name</label>
                         <input type="text" id="firstName" name="firstName-nofill" placeholder="e.g. John" required minlength="2"
-                            pattern="^[A-Za-z .'\-]+$" title="First name must be at least 2 letters" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false">
+                            pattern="^ *[A-Za-z](?: *[A-Za-z])+ *$" title="First name: at least 2 letters, letters and spaces only" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false">
                     </div>
                     <div class="form-group">
                         <label for="lastName">Last Name</label>
                         <input type="text" id="lastName" name="lastName-nofill" placeholder="e.g. Smith" required minlength="2"
-                            pattern="^[A-Za-z .'\-]+$" title="Last name must be at least 2 letters" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false">
+                            pattern="^ *[A-Za-z](?: *[A-Za-z])+ *$" title="Last name: at least 2 letters, letters and spaces only" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false">
                     </div>
                 </div>
 
@@ -1800,8 +1800,10 @@
 
         async function handleSaveAndContinue(currentStep, nextStep, button) {
             if (!validateStep(currentStep)) return;
-            await saveDraftToServer(button, currentStep);
-            goToStep(nextStep);
+            // Stay on this step if the backend rejected the data (e.g. invalid DOB) — the
+            // error toast is already shown, and moving on would leave it unsaved.
+            const saved = await saveDraftToServer(button, currentStep);
+            if (saved) goToStep(nextStep);
         }
 
         // Mobile Menu Toggle
@@ -1880,6 +1882,8 @@
             });
         }
         restrictToPattern(document.getElementById('username'), /\s/g);
+        restrictToPattern(document.getElementById('firstName'), /[^A-Za-z ]/g);
+        restrictToPattern(document.getElementById('lastName'), /[^A-Za-z ]/g);
 
         document.getElementById('email').addEventListener('input', function() {
             this.setCustomValidity('');
@@ -2378,8 +2382,8 @@
             }
         }
 
-        // ---------- DOB range check: day <= 31, month <= 12, year <= 2024 ----------
-        function attachDateRangeCheck(el, maxYear) {
+        // ---------- DOB range check: day <= 31, month <= 12, minYear <= year <= maxYear ----------
+        function attachDateRangeCheck(el, minYear, maxYear) {
             if (!el) return;
             el.addEventListener('input', () => {
                 const match = el.value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
@@ -2394,6 +2398,8 @@
                     el.setCustomValidity('Day must be between 01 and 31.');
                 } else if (month < 1 || month > 12) {
                     el.setCustomValidity('Month must be between 01 and 12.');
+                } else if (year < minYear) {
+                    el.setCustomValidity('Year cannot be earlier than ' + minYear + '.');
                 } else if (year > maxYear) {
                     el.setCustomValidity('Year cannot be later than ' + maxYear + '.');
                 } else {
@@ -2401,7 +2407,7 @@
                 }
             });
         }
-        attachDateRangeCheck(document.getElementById('dob'), 2024);
+        attachDateRangeCheck(document.getElementById('dob'), 1900, 2024);
 
         // ---------- Validation ----------
         function clearGroupError(group) {
