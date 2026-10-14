@@ -1497,6 +1497,19 @@
             document.getElementById(tabId + '-tab').style.display = 'block';
         }
 
+        function tabTitle(tabId) {
+            return tabId === 'services' ? 'Services' : 'Product';
+        }
+
+        // A field in the hidden Product/Services tab can't be focused or scrolled to,
+        // so open its tab first — otherwise the error points at something the user can't see.
+        function focusInTab(tabId, input) {
+            const tabBtn = document.querySelector('.tab-btn[onclick*="\'' + tabId + '\'"]');
+            if (tabBtn) switchTab(tabBtn, tabId);
+            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            input.focus();
+        }
+
         function formVal(id) {
             const el = document.getElementById(id);
             return el ? el.value.trim() : '';
@@ -2427,19 +2440,18 @@
 
             if (stepNumber === 3) {
                 const pairs = [
-                    { checkbox: '#product-tab input[type="checkbox"]#skills', input: '#product-tab input[type="text"]#skills', label: 'Skills' },
-                    { checkbox: '#product-tab input[type="checkbox"]#manufacturing', input: '#manufacturingLocationSearch', label: 'Manufacturing location' },
-                    { checkbox: '#product-tab input[type="checkbox"]#team', input: '#employees', label: 'Number of full time employees' },
-                    { checkbox: '#services-tab input[type="checkbox"]#skills2', input: '#services-tab input[type="text"]#skills2', label: 'Skills' },
-                    { checkbox: '#services-tab input[type="checkbox"]#team-services', input: '#employees-services', label: 'Number of full time employees' }
+                    { tab: 'product', checkbox: '#product-tab input[type="checkbox"]#skills', input: '#product-tab input[type="text"]#skills', label: 'Skills' },
+                    { tab: 'product', checkbox: '#product-tab input[type="checkbox"]#manufacturing', input: '#manufacturingLocationSearch', label: 'Manufacturing location' },
+                    { tab: 'product', checkbox: '#product-tab input[type="checkbox"]#team', input: '#employees', label: 'Number of full time employees' },
+                    { tab: 'services', checkbox: '#services-tab input[type="checkbox"]#skills2', input: '#services-tab input[type="text"]#skills2', label: 'Skills' },
+                    { tab: 'services', checkbox: '#services-tab input[type="checkbox"]#team-services', input: '#employees-services', label: 'Number of full time employees' }
                 ];
                 for (const pair of pairs) {
                     const checkbox = document.querySelector(pair.checkbox);
                     const input = document.querySelector(pair.input);
                     if (checkbox && checkbox.checked && input && !input.value.trim()) {
-                        showToast('Please fill "' + pair.label + '".');
-                        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        input.focus();
+                        showToast('Please fill "' + pair.label + '" in ' + tabTitle(pair.tab) + ' tab.');
+                        focusInTab(pair.tab, input);
                         return false;
                     }
                 }
@@ -2451,7 +2463,7 @@
                 { search: 'locationSearch', city: 'city', label: 'Location' },
                 { search: 'companyLocationSearch', city: 'companyLocation', label: 'Company Location' },
                 { search: 'channelPartnerLocationSearch', city: 'channelPartnerLocation', label: 'Location where you are open for Distributors / Channel Partners' },
-                { search: 'manufacturingLocationSearch', city: 'manufacturingLocation', label: 'Manufacturing location', checkbox: '#product-tab input[type="checkbox"]#manufacturing' }
+                { search: 'manufacturingLocationSearch', city: 'manufacturingLocation', label: 'Manufacturing location', checkbox: '#product-tab input[type="checkbox"]#manufacturing', tab: 'product' }
             ];
             for (const lp of locationPairs) {
                 const searchEl = section.querySelector('#' + lp.search);
@@ -2463,9 +2475,14 @@
                 const cityEl = document.getElementById(lp.city);
                 if (searchEl.value.trim() && !(cityEl && cityEl.value.trim())) {
                     searchEl.classList.add('error');
-                    showToast('Please select the location from the dropdown.');
-                    searchEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    searchEl.focus();
+                    if (lp.tab) {
+                        showToast('Please select the ' + lp.label.toLowerCase() + ' from the dropdown in ' + tabTitle(lp.tab) + ' tab.');
+                        focusInTab(lp.tab, searchEl);
+                    } else {
+                        showToast('Please select the location from the dropdown.');
+                        searchEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        searchEl.focus();
+                    }
                     return false;
                 }
                 searchEl.classList.remove('error');
