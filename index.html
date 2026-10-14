@@ -180,7 +180,7 @@
                     <div class="form-group">
                         <label for="linkedin">Linkedin profile URL</label>
                         <input type="text" id="linkedin" name="linkedin-nofill" placeholder="https://linkedin.com/in/username"
-                            pattern="^https?:\/\/([a-z]{2,3}\.)?linkedin\.com\/.+$"
+                            pattern=".*linkedin\.com\/.*"
                             title="Please enter a valid LinkedIn profile URL" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false">
                     </div>
                     <div class="form-group">
@@ -310,7 +310,7 @@
                     <div class="form-group">
                         <label for="websiteUrl">Company's website URL</label>
                         <input type="text" id="websiteUrl" name="websiteUrl-nofill" placeholder="Enter website URL"
-                            pattern="^(https?:\/\/)?([0-9a-zA-Z\-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$"
+                            pattern=".+\..+"
                             title="Please enter a valid website URL, e.g. https://example.com" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false">
                     </div>
                 </div>
@@ -661,6 +661,78 @@
                 suggestionsBox.style.display = 'block';
             }
 
+            // ---- Google Places (New), only for fields with config.useGoogle ----
+            // Returns false when Google can't be used (script not loaded yet, API disabled,
+            // quota/billing error) so the caller falls back to Photon instead of showing nothing.
+            let googleSessionToken = null;
+            async function searchGoogle(query, requestId) {
+                if (!(window.google && google.maps && google.maps.importLibrary)) return false;
+                try {
+                    const { AutocompleteSuggestion, AutocompleteSessionToken } = await google.maps.importLibrary('places');
+                    // One token per typing session (ended by the details fetch on select) — Google
+                    // bills the whole session as one request instead of every keystroke.
+                    if (!googleSessionToken) googleSessionToken = new AutocompleteSessionToken();
+                    const { suggestions } = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+                        input: query,
+                        includedPrimaryTypes: ['(regions)'],
+                        sessionToken: googleSessionToken
+                    });
+                    if (requestId === latestRequestId) {
+                        renderGoogleSuggestions(suggestions.map(s => s.placePrediction).filter(Boolean));
+                    }
+                    return true;
+                } catch (err) {
+                    return false;
+                }
+            }
+
+            function renderGoogleSuggestions(predictions) {
+                suggestionsBox.innerHTML = '';
+                if (!predictions.length) {
+                    hideSuggestions();
+                    return;
+                }
+                predictions.forEach((prediction) => {
+                    const label = prediction.text.toString();
+                    const item = document.createElement('div');
+                    item.className = 'location-suggestion-item';
+                    item.textContent = label;
+                    item.addEventListener('click', () => selectGooglePlace(prediction, label));
+                    suggestionsBox.appendChild(item);
+                });
+                suggestionsBox.style.display = 'block';
+            }
+
+            async function selectGooglePlace(prediction, label) {
+                searchInput.value = label;
+                searchInput.classList.remove('error');
+                hideSuggestions();
+                // Same rule as Photon: backend needs non-empty city/state/country, so a
+                // country/state-level pick reuses the next coarser value.
+                let city = '';
+                let state = '';
+                let country = '';
+                try {
+                    const place = prediction.toPlace();
+                    await place.fetchFields({ fields: ['addressComponents'] });
+                    const comp = (type) => {
+                        const c = (place.addressComponents || []).find(a => a.types.includes(type));
+                        return c ? c.longText : '';
+                    };
+                    country = comp('country');
+                    state = comp('administrative_area_level_1') || country;
+                    city = comp('locality') || comp('postal_town') || comp('administrative_area_level_2') || state;
+                } catch (err) {
+                    // Details lookup failed — fall back to the label: "City, State, Country".
+                    const parts = label.split(',').map(s => s.trim()).filter(Boolean);
+                    city = parts[0] || '';
+                    country = parts[parts.length - 1] || city;
+                    state = parts.length > 2 ? parts[parts.length - 2] : country;
+                }
+                googleSessionToken = null;
+                config.onSelect({ city, state, country });
+            }
+
             async function searchLocation(query) {
                 // Cancel any still-in-flight request so a slow, now-outdated response can't
                 // land after (and overwrite) the result of what the user typed next.
@@ -671,16 +743,71 @@
                 const requestId = ++latestRequestId;
                 spinner.classList.add('active');
 
+                if (config.useGoogle) {
+                    const handled = await searchGoogle(query, requestId);
+                    if (requestId !== latestRequestId) return; // superseded while Google was answering
+                    if (handled) {
+                        spinner.classList.remove('active');
+                        return;
+                    }
+                }
+
                 try {
                     const layers = ['city', 'state', 'country'];
-                    const response = await axios.get('https://photon.komoot.io/api/'
-                        + '?q=' + encodeURIComponent(query) + '&limit=5&lang=en&bbox=68,6,97.5,37.5'
-                        + layers.map(l => '&layer=' + l).join(''), {
-                        signal: abortController.signal,
-                        timeout: 6000
-                    });
-                    if (requestId !== latestRequestId) return; // superseded by a newer keystroke
-                    renderSuggestions((response.data && response.data.features) || []);
+                    const url = 'https://photon.komoot.io/api/'
+                        + '?q=' + encodeURIComponent(query) + '&limit=5&lang=en'
+                        + layers.map(l => '&layer=' + l).join('');
+                    // Photon's public server is often slow (3-6s+); a short timeout silently dropped
+                    // the worldwide results, leaving only India-box fuzzy matches on screen.
+                    const cfg = { signal: abortController.signal, timeout: 12000 };
+
+                    // Photon fuzzy-matches, so "mumbai" also returns Multai/Muhrai and "london"
+                    // returns Lodon/Landan. Rank by how well the name matches what was typed:
+                    // exact, then prefix, then a word inside the name ("Navi Mumbai"), then fuzzy.
+                    const q = query.trim().toLowerCase();
+                    const matchTier = (f) => {
+                        const name = cleanCityName((f.properties || {}).name).toLowerCase();
+                        if (name === q) return 0;
+                        if (name.startsWith(q)) return 1;
+                        if (name.split(/[\s,-]+/).some(w => w.startsWith(q))) return 2;
+                        return 3;
+                    };
+                    // Within a tier, bigger places first — so "lond" puts London above the village Londi.
+                    const sizeOrder = { country: 0, state: 1, city: 2, town: 3 };
+                    const sizeRank = (f) => {
+                        const v = (f.properties || {}).osm_value;
+                        return v in sizeOrder ? sizeOrder[v] : 4;
+                    };
+
+                    // India-box first so Indian places keep ranking on top; the worldwide query
+                    // alongside it brings in places outside India (e.g. London). A worldwide-only
+                    // search buries Indian results under same-named Pakistani villages.
+                    let indiaFeatures = [];
+                    let worldFeatures = [];
+                    let pending = 2;
+                    let failed = 0;
+                    // Render as each response lands so a slow request doesn't hold up the other.
+                    // Fuzzy (non-matching) results are a typo fallback only, once both are in.
+                    const render = () => {
+                        const merged = [...indiaFeatures, ...worldFeatures];
+                        const matching = merged.filter(f => matchTier(f) < 3);
+                        const results = matching.length || pending ? matching : merged;
+                        renderSuggestions(results.sort((a, b) =>
+                            (matchTier(a) - matchTier(b)) || (sizeRank(a) - sizeRank(b))));
+                    };
+                    const fetchInto = (extra, assign) => axios.get(url + extra, cfg)
+                        .then((r) => { assign((r.data && r.data.features) || []); })
+                        .catch((err) => { failed++; if (axios.isCancel(err)) throw err; })
+                        .finally(() => {
+                            pending--;
+                            if (requestId === latestRequestId) render();
+                        });
+
+                    await Promise.allSettled([
+                        fetchInto('&bbox=68,6,97.5,37.5', (f) => { indiaFeatures = f; }),
+                        fetchInto('', (f) => { worldFeatures = f; })
+                    ]);
+                    if (requestId === latestRequestId && failed === 2) hideSuggestions();
                 } catch (err) {
                     if (requestId === latestRequestId && !axios.isCancel(err)) {
                         hideSuggestions();
@@ -731,11 +858,23 @@
             });
         }
 
+        // Google Maps JS (Places) for the Personal Info location field. Loaded async so a slow
+        // or blocked load never holds up the page — that field uses Photon until it's ready.
+        (function loadGoogleMaps() {
+            if (!window.ENV.GOOGLE_MAPS_KEY) return;
+            const script = document.createElement('script');
+            script.src = 'https://maps.googleapis.com/maps/api/js?key='
+                + encodeURIComponent(window.ENV.GOOGLE_MAPS_KEY) + '&libraries=places&loading=async';
+            script.async = true;
+            document.head.appendChild(script);
+        })();
+
         setupLocationSearch({
             inputId: 'locationSearch',
             suggestionsId: 'locationSuggestions',
             spinnerId: 'locationSpinner',
             cityFieldId: 'city',
+            useGoogle: true,
             onSelect: (loc) => {
                 document.getElementById('city').value = loc.city;
                 document.getElementById('state').value = loc.state;
@@ -1641,6 +1780,12 @@
                 });
             });
         }
+
+        // Pasted/autofilled URLs often carry a stray space, which fails the pattern check.
+        ['linkedin', 'websiteUrl'].forEach(id => {
+            const el = document.getElementById(id);
+            el.addEventListener('blur', () => { el.value = el.value.trim(); });
+        });
 
         // Stop mouse-wheel scroll from silently changing a focused number input's value.
         document.querySelectorAll('input[type="number"]').forEach(el => {
