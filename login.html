@@ -31,11 +31,11 @@
             <p class="auth-card-subtitle">Enter your mobile number to receive a verification code and begin your Prive
                 journey.</p> -->
 
-            <form id="loginForm" novalidate>
+            <form id="loginForm" novalidate autocomplete="off">
                 <div class="auth-form-group">
                     <label for="mobile">Mobile number</label>
                     <input type="tel" id="mobile" name="mobile-nofill" class="auth-input"
-                        placeholder="Enter mobile number" inputmode="numeric" required>
+                        placeholder="Enter mobile number" inputmode="numeric" required autocomplete="new-password">
                     <p class="auth-error-text" id="mobileError">Please enter a valid 10 digit mobile number.</p>
                 </div>
 
@@ -57,6 +57,8 @@
         redirectIfAuthenticated();
 
         const mobileInput = document.getElementById('mobile');
+        // Random name per load so Chrome has no stable key to suggest past numbers from
+        mobileInput.name = 'mobile-' + Math.random().toString(36).slice(2, 10);
         const mobileError = document.getElementById('mobileError');
 
         mobileInput.addEventListener('input', () => {
