@@ -167,6 +167,10 @@ function getApiErrorMessage(error, fallback) {
 // Only one toast is ever shown at a time — a rapid double-click or an overlapping
 // retry would otherwise stack several identical toasts on screen.
 function showToast(message, type) {
+    // While the "Submitted" popup is up (errorCode 110), the caller's own error toast —
+    // e.g. "not allowed to update user details after final submission" — is just noise.
+    const submitModal = document.getElementById('submitSuccessModal');
+    if (submitModal && submitModal.style.display === 'flex') return;
     type = type || 'error';
     let container = document.getElementById('toastContainer');
     if (!container) {
