@@ -4,7 +4,7 @@
 // equivalent: it sets values on `window.ENV` before any other script runs.
 window.ENV = {
     API_BASE_URL: 'https://pretest.elred.io/theNetwork',
-    HASH_ID: 'elRED',
+    HASH_ID: 'Prive',
     // Browser key — visible in page source, so restrict it by HTTP referrer in Google Cloud.
     GOOGLE_MAPS_KEY: 'AIzaSyB5zuCJ1_cyCeerv_mntTmRbM3Nnor26BM'
 };
